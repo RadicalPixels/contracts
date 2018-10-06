@@ -8,7 +8,7 @@ contract HarbingerTaxable {
   uint256 public taxPercentage;
   address public taxCollector;
 
-  constructor(uint256 _taxPercentage, address _taxCollector) {
+  constructor(uint256 _taxPercentage, address _taxCollector) public {
     taxPercentage = _taxPercentage;
     taxCollector = _taxCollector;
   }
