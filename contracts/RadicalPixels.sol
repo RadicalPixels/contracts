@@ -67,6 +67,24 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 indexed addedFunds
   );
 
+  event BeginDutchAuction(
+    bytes32 indexed pixelId,
+    uint256 indexed tokenId,
+    address indexed initiator,
+    uint256 x,
+    uint256 y,
+    uint256 startTime,
+    uint256 endTime
+  );
+
+  event EndDutchAuction(
+    bytes32 indexed pixelId,
+    uint256 indexed tokenId,
+    address indexed claimer,
+    uint256 x,
+    uint256 y
+  );
+
   constructor(uint256 _xMax, uint256 _yMax)
     public
   {
@@ -144,12 +162,68 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   }
 
   /**
+   * Trigger a dutch auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function beginDutchAuction(uint256 _x, uint256 _y)
+    public
+    validRange(_x, _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(!userHasPositveBalance(pixel.seller));
+
+    // Start a dutch auction
+
+    uint256 tokenId = _encodeTokenId(_x, _y);
+
+    emit BeginDutchAuction(
+      pixel.id,
+      tokenId,
+      msg.sender,
+      _x,
+      _y,
+      block.timestamp,
+      block.timestamp.add(1 days)
+    );
+  }
+
+  /**
+   * End the auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function endDutchAuction(uint256 _x, uint256 _y)
+    public
+    validRange(_x, _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(!userHasPositveBalance(pixel.seller));
+
+    // End dutch auction
+    // address winner = endAuction();
+
+    uint256 tokenId = _encodeTokenId(_x, _y);
+
+    emit EndDutchAuction(
+      pixel.id,
+      tokenId,
+      msg.sender, // should be winner
+      _x,
+      _y
+    );
+  }
+
+
+  /**
    * Encode a token ID for transferability
    * @param _x X coordinate of the desired block
    * @param _y Y coordinate of the desired block
    */
   function encodeTokenId(uint256 _x, uint256 _y)
-    external
+    public
     view
     validRange(_x, _y)
     returns (uint256)
