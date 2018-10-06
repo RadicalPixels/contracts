@@ -1,3 +1,4 @@
+pragma solidity ^0.4.25;
 
 contract HarbingerTaxable {
     // TODO: Use SafeMath
