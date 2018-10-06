@@ -19,7 +19,7 @@ contract RadicalPixels {
     uint256 price;
   }
 
-  mapping (uint256 => mapping(uint256 => Order)) public pixelByCoordinate;
+  mapping (uint256 => mapping(uint256 => Pixel)) public pixelByCoordinate;
 
   uint256 public xMax;
   uint256 public yMax;
@@ -49,7 +49,7 @@ contract RadicalPixels {
   * @param _x X coordinate of the desired block
   * @param _y Y coordinate of the desired block
   */
-  funciton buyPixelBlock(uint256 _x, uint256 _y)
+  function buyPixelBlock(uint256 _x, uint256 _y)
     public
     payable
     // userHasPositiveBalance
@@ -71,11 +71,11 @@ contract RadicalPixels {
     pixel.seller.transfer(pixel.price);
 
     emit BuyPixel(
-      seller,
-      buyer,
-      x,
-      y,
-      price
+      pixel.seller,
+      msg.sender,
+      _x,
+      _y,
+      pixel.price
     );
   }
 
@@ -85,13 +85,13 @@ contract RadicalPixels {
   //   public
   //   payable
   // {
-  //   emit BuyPixel(
-  //     seller,
-  //     buyer,
-  //     x,
-  //     y,
-  //     price
-  //   );
+  // emit BuyPixel(
+  //   pixel.seller,
+  //   msg.sender,
+  //   _x,
+  //   _y,
+  //   pixel.price
+  // );
   // }
 
 
