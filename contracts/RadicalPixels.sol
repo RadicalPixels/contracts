@@ -74,34 +74,20 @@ contract RadicalPixels {
    */
 
   /**
-  * @dev Buys an uninitialized pixel block for 0 ETH
-  * @param _x X coordinate of the desired block
-  * @param _y Y coordinate of the desired block
-  * @param _price New price for the pixel
+  * @dev Buys pixel blocks
+  * @param _x X coordinates of the desired blocks
+  * @param _y Y coordinates of the desired blocks
+  * @param _price New prices of the pixel blocks
   */
-  function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+  function buyUninitializedPixelBlocks(uint256[] _x, uint256[] _y, uint256[] _price)
     public
     payable
-    validRange(_x, _y)
-    // userHasPositiveBalance
   {
-    Pixel memory pixel = pixelByCoordinate[_x][_y];
-
-    require(pixel.seller == address(0), "Pixel must not be initialized");
-
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
-
-    // TODO: Mint token
-    // _mint(to, tokenId)
-
-    emit BuyPixel(
-      pixelId,
-      address(0),
-      msg.sender,
-      _x,
-      _y,
-      _price
-    );
+    require(_x.length == _y.length && _x.length == _price.length);
+    for (uint i = 0; i < _x.length; i++) {
+      require(_price[i] > 0);
+      _buyUninitializedPixelBlock(_x[i], _y[i], _price[i]);
+    }
   }
 
   /**
@@ -152,68 +138,98 @@ contract RadicalPixels {
    * Internal Functions
    */
 
-   /**
+  /**
+  * @dev Buys an uninitialized pixel block for 0 ETH
+  * @param _x X coordinate of the desired block
+  * @param _y Y coordinate of the desired block
+  * @param _price New price for the pixel
+  */
+  function _buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+    internal
+    validRange(_x, _y)
+    // userHasPositiveBalance
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(pixel.seller == address(0), "Pixel must not be initialized");
+
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
+
+    // TODO: Mint token
+    // _mint(to, tokenId)
+
+    emit BuyPixel(
+      pixelId,
+      address(0),
+      msg.sender,
+      _x,
+      _y,
+      _price
+    );
+  }
+
+  /**
    * @dev Buys a pixel block
    * @param _x X coordinate of the desired block
    * @param _y Y coordinate of the desired block
    * @param _price New price of the pixel block
    */
-   function _buyPixelBlock(uint256 _x, uint256 _y, uint256 _price)
-     internal
-     validRange(_x, _y)
-     // userHasPositiveBalance
-   {
-     Pixel memory pixel = pixelByCoordinate[_x][_y];
+  function _buyPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+    internal
+    validRange(_x, _y)
+    // userHasPositiveBalance
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
 
-     require(pixel.seller != address(0), "Pixel must be initialized");
-     require(pixel.price == _price, "Must have sent sufficient funds");
+    require(pixel.seller != address(0), "Pixel must be initialized");
+    require(pixel.price == _price, "Must have sent sufficient funds");
 
-     // TODO: Send token
-     // _removeTokenFrom(from, tokenId);
-     // _addTokenTo(to, tokenId);
-     //
-     // emit Transfer(from, to, tokenId);
+    // TODO: Send token
+    // _removeTokenFrom(from, tokenId);
+    // _addTokenTo(to, tokenId);
+    //
+    // emit Transfer(from, to, tokenId);
 
-     pixel.seller.transfer(pixel.price);
+    pixel.seller.transfer(pixel.price);
 
-     emit BuyPixel(
-       pixel.id,
-       pixel.seller,
-       msg.sender,
-       _x,
-       _y,
-       pixel.price
-     );
-   }
+    emit BuyPixel(
+      pixel.id,
+      pixel.seller,
+      msg.sender,
+      _x,
+      _y,
+      pixel.price
+    );
+  }
 
-   /**
-   * @dev Set prices for a specific block
-   * @param _x X coordinate of the desired block
-   * @param _y Y coordinate of the desired block
-   * @param _price New price of the pixel block
-   */
-   function _setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
-     internal
-     validRange(_x, _y)
-   {
-     Pixel memory pixel = pixelByCoordinate[_x][_y];
+  /**
+  * @dev Set prices for a specific block
+  * @param _x X coordinate of the desired block
+  * @param _y Y coordinate of the desired block
+  * @param _price New price of the pixel block
+  */
+  function _setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
+    internal
+    validRange(_x, _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
 
-     require(pixel.seller == msg.sender, "Sender must own the block");
+    require(pixel.seller == msg.sender, "Sender must own the block");
 
-     delete pixelByCoordinate[_x][_y];
+    delete pixelByCoordinate[_x][_y];
 
-     bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
 
-     emit SetPixelPrice(
-       pixelId,
-       pixel.seller,
-       _x,
-       _y,
-       pixel.price
-     );
-   }
+    emit SetPixelPrice(
+      pixelId,
+      pixel.seller,
+      _x,
+      _y,
+      pixel.price
+    );
+  }
 
-   /**
+  /**
     * @dev Update pixel mapping every time it is purchase or the price is
     * changed
     * @param _seller Seller of the pixel block
