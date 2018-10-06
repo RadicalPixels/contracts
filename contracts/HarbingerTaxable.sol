@@ -87,7 +87,7 @@ contract HarbingerTaxable {
         require(lastPaidTaxes[user] != 0, "User does not own any tokens");
         
         uint256 timeElapsed = now - lastPaidTaxes[user];
-        return timeElapsed * taxPercentage / 100;
+        return (valueHeld * timeElapsed / 1 years)  * taxPercentage / 100;
     }
     
     function _addToValueHeld(address user, uint256 value) internal {
