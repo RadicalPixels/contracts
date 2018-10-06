@@ -121,6 +121,9 @@ contract RadicalPixels {
     }
   }
 
+  /**
+   * @dev Set a price for a specific block
+   */
   function setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
     public
     validRange(_x, _y)
@@ -142,7 +145,15 @@ contract RadicalPixels {
     );
   }
 
-  // funciton addFunds()
+  /**
+   * @dev Adds funds to a users value held
+   */
+  function addFunds()
+    public
+    payable
+  {
+    // _addToValueHeld(msg.sender, msg.value);
+  }
 
   /**
    * Internal Functions
@@ -203,7 +214,7 @@ contract RadicalPixels {
     bytes32 pixelId = keccak256(
       abi.encodePacked(
         _x,
-        _y,
+        _y
       )
     );
 
