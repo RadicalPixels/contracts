@@ -62,11 +62,12 @@ contract RadicalPixels {
     require(pixel.seller != address(0), "Pixel must be initialized");
     require(pixel.price == msg.value, "Must have sent sufficient funds");
 
+    // TODO: Create token ID
+    // TODO: Send token
     // _removeTokenFrom(from, tokenId);
     // _addTokenTo(to, tokenId);
     //
     // emit Transfer(from, to, tokenId);
-
 
     pixel.seller.transfer(pixel.price);
 
@@ -79,8 +80,41 @@ contract RadicalPixels {
     );
   }
 
-  // function buyUninitializedPixelBlock()
+  /**
+  * @dev Buys an uninitialized pixel block for 0 ETH
+  * @param _x X coordinate of the desired block
+  * @param _y Y coordinate of the desired block
+  * @param _price New price for the pixel
+  */
+  function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+    public
+    payable
+    // userHasPositiveBalance
+  {
+    require(_x < xMax, "X coordinate is out of range");
+    require(_y < yMax, "Y coordinate is out of range");
 
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(pixel.seller == address(0), "Pixel must not be initialized");
+
+    pixel.seller = msg.sender;
+    pixel.x = _x;
+    pixel.y = _y;
+    pixel.price = _price;
+
+    // TODO: Create token ID
+    // TODO: Mint token
+    // _mint(to, tokenId)
+
+    emit BuyPixel(
+      address(0),
+      msg.sender,
+      _x,
+      _y,
+      _price
+    );
+  }
   // function sellPixelBlock public ()
   //   public
   //   payable
