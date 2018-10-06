@@ -69,6 +69,10 @@ contract RadicalPixels {
   }
 
   /**
+   * Public Functions
+   */
+
+  /**
   * @dev Buys an uninitialized pixel block for 0 ETH
   * @param _x X coordinate of the desired block
   * @param _y Y coordinate of the desired block
