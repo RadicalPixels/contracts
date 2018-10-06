@@ -9,7 +9,6 @@ import "./HarbergerTaxable.sol";
 contract RadicalPixels is HarbergerTaxable, ERC721Token {
   using SafeMath for uint256;
 
-
   uint256 public   xMax;
   uint256 public   yMax;
   uint256 constant clearLow = 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000;
@@ -27,9 +26,29 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 y;
     // Pixel block price
     uint256 price;
+    // Auction Id
+    bytes32 auctionId;
+  }
+
+  struct Auction {
+    // Id of the auction
+    bytes32 auctionId;
+    // Id of the pixel block
+    bytes32 blockId;
+    // Pixel block x coordinate
+    uint256 x;
+    // Pixel block y coordinate
+    uint256 y;
+    // Current price
+    uint256 currentPrice;
+    // Current Leader
+    address currentLeader;
+    // End Time
+    uint256 endTime;
   }
 
   mapping(uint256 => mapping(uint256 => Pixel)) public pixelByCoordinate;
+  mapping(bytes32 => Auction) public auctionById;
 
   /**
    * Modifiers
@@ -65,6 +84,34 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   event AddFunds(
     address indexed owner,
     uint256 indexed addedFunds
+  );
+
+  event BeginDutchAuction(
+    bytes32 indexed pixelId,
+    uint256 indexed tokenId,
+    bytes32 indexed auctionId,
+    address initiator,
+    uint256 x,
+    uint256 y,
+    uint256 startTime,
+    uint256 endTime
+  );
+
+  event UpdateAuctionBid(
+    bytes32 indexed pixelId,
+    uint256 indexed tokenId,
+    bytes32 indexed auctionId,
+    address bidder,
+    uint256 amountBet,
+    uint256 timeBet
+  );
+
+  event EndDutchAuction(
+    bytes32 indexed pixelId,
+    uint256 indexed tokenId,
+    address indexed claimer,
+    uint256 x,
+    uint256 y
   );
 
   constructor(uint256 _xMax, uint256 _yMax)
@@ -144,12 +191,103 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   }
 
   /**
+   * Trigger a dutch auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function beginDutchAuction(uint256 _x, uint256 _y)
+    public
+    validRange(_x, _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(!userHasPositveBalance(pixel.seller));
+    require(pixel.auctionId == 0);
+
+    // Start a dutch auction
+    pixel.auctionId = _generateDutchAuction(_x, _y);
+
+    uint256 tokenId = _encodeTokenId(_x, _y);
+
+    emit BeginDutchAuction(
+      pixel.id,
+      tokenId,
+      pixel.auctionId,
+      msg.sender,
+      _x,
+      _y,
+      block.timestamp,
+      block.timestamp.add(1 days)
+    );
+  }
+
+  /**
+   * @dev Allow a user to bid in an auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   * @param _bid Desired bid of the user
+   */
+  function bidInAuction(uint256 _x, uint256 _y, uint256 _bid)
+    public
+    validRange(_x, _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    Auction memory auction = auctionById[pixel.auctionId];
+
+    uint256 _tokenId = _encodeTokenId(_x, _y);
+    require(pixel.auctionId != 0);
+    require(auction.currentPrice < _bid);
+    require(auction.endTime < block.timestamp);
+
+    auction.currentPrice = _bid;
+    auction.currentLeader = msg.sender;
+
+    emit UpdateAuctionBid(
+      pixel.id,
+      _tokenId,
+      auction.auctionId,
+      msg.sender,
+      _bid,
+      block.timestamp
+    );
+  }
+
+  /**
+   * End the auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function endDutchAuction(uint256 _x, uint256 _y)
+    public
+    validRange(_x, _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    Auction memory auction = auctionById[pixel.auctionId];
+
+    require(pixel.auctionId != 0);
+    require(block.timestamp < auction.endTime);
+
+    // End dutch auction
+    address winner = _endDutchAuction(_x, _y);
+
+    uint256 tokenId = _encodeTokenId(_x, _y);
+
+    emit EndDutchAuction(
+      pixel.id,
+      tokenId,
+      winner,
+      _x,
+      _y
+    );
+  }
+
+  /**
    * Encode a token ID for transferability
    * @param _x X coordinate of the desired block
    * @param _y Y coordinate of the desired block
    */
   function encodeTokenId(uint256 _x, uint256 _y)
-    external
+    public
     view
     validRange(_x, _y)
     returns (uint256)
@@ -254,6 +392,56 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   }
 
   /**
+   * Generate a dutch auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function _generateDutchAuction(uint256 _x, uint256 _y)
+    internal
+    returns (bytes32)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    bytes32 _auctionId = keccak256(
+      abi.encodePacked(
+        block.timestamp,
+        _x,
+        _y
+      )
+    );
+
+    auctionById[_auctionId] = Auction({
+      auctionId: _auctionId,
+      blockId: pixel.id,
+      x: _x,
+      y: _y,
+      currentPrice: 0,
+      currentLeader: msg.sender,
+      endTime: block.timestamp.add(1 days)
+    });
+
+    return _auctionId;
+  }
+
+  /**
+   * End a finished dutch auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function _endDutchAuction(uint256 _x, uint256 _y)
+    internal
+    returns (address)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    Auction memory auction = auctionById[pixel.auctionId];
+
+    address _winner = auction.currentLeader;
+
+    delete auctionById[auction.auctionId];
+
+    return _winner;
+  }
+  /**
     * @dev Update pixel mapping every time it is purchase or the price is
     * changed
     * @param _seller Seller of the pixel block
@@ -283,12 +471,12 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       seller: _seller,
       x: _y,
       y: _x,
-      price: _price
+      price: _price,
+      auctionId: 0
     });
 
     return pixelId;
   }
-
 
   /**
    * Encode token ID
