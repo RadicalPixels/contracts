@@ -1,12 +1,17 @@
 pragma solidity ^0.4.24;
 
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import "openzeppelin-solidity/contracts/Math/SafeMath.sol";
+import "./HarbingerTaxable.sol";
 
 /**
  * @title RadicalPixels
  */
-contract RadicalPixels {
+contract RadicalPixels is HarbingerTaxable {
   using SafeMath for uint256;
+
+
+  uint256 public xMax;
+  uint256 public yMax;
 
   struct Pixel {
     // Id of the pixel block
@@ -21,12 +26,7 @@ contract RadicalPixels {
     uint256 price;
   }
 
-  mapping (uint256 => mapping(uint256 => Pixel)) public pixelByCoordinate;
-
-  uint256 public xMax;
-  uint256 public yMax;
-
-  mapping(uint256 => mapping(uint256 => uint256)) public pixelBlockPrice;
+  mapping(uint256 => mapping(uint256 => Pixel)) public pixelByCoordinate;
 
   /**
    * Modifiers
