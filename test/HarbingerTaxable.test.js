@@ -5,8 +5,8 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-const HarbingerTaxable = artifacts.require('HarbingerTaxableMock');
+const HarbergerTaxable = artifacts.require('HarbergerTaxableMock');
 
-contract('HarbingerTaxable', function (accounts) {
+contract('HarbergerTaxable', function (accounts) {
   
 })

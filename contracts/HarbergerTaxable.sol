@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-contract HarbingerTaxable {
+contract HarbergerTaxable {
   using SafeMath for uint256;
 
   uint256 public taxPercentage;

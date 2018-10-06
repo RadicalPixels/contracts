@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "../HarbingerTaxable.sol";
+import "../HarbergerTaxable.sol";
 
-contract HarbingerTaxableMock is HarbingerTaxable {
+contract HarbergerTaxableMock is HarbergerTaxable {
 
   function addToValueHeld(address user, uint256 value) internal {
     _addToValueHeld(user, value);
