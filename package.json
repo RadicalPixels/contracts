@@ -7,11 +7,15 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "scripts/test.sh"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "openzeppelin-solidity": "^1.12.0"
+    "chai": "^4.2.0",
+    "chai-bignumber": "^2.0.2",
+    "ganache-cli": "^6.1.8",
+    "openzeppelin-solidity": "^1.12.0",
+    "truffle": "^4.1.14"
   }
 }

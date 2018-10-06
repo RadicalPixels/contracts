@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
-import "./HarbingerTaxable.sol";
+import "./HarbergerTaxable.sol";
 
 /**
  * @title RadicalPixels
  */
-contract RadicalPixels is HarbingerTaxable, ERC721Token {
+contract RadicalPixels is HarbergerTaxable, ERC721Token {
   using SafeMath for uint256;
 
 
