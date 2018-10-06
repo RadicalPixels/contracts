@@ -1,7 +1,9 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.4.24;
+
+import "openzeppelin-solidity/contracts/Math/SafeMath.sol";
 
 contract HarbingerTaxable {
-  // TODO: Use SafeMath
+  using SafeMath for uint256;
 
   uint256 public taxPercentage;
   address public taxCollector;
@@ -85,9 +87,9 @@ contract HarbingerTaxable {
   function _taxesDue(address user) internal view returns (uint256) {
     // Make sure user owns tokens
     require(lastPaidTaxes[user] != 0, "User does not own any tokens");
-    
+
     uint256 timeElapsed = now - lastPaidTaxes[user];
-    return (valueHeld * timeElapsed / 1 years)  * taxPercentage / 100;
+    return (valueHeld[user] * timeElapsed / 1 days)  * taxPercentage / 100;
   }
 
   function _addToValueHeld(address user, uint256 value) internal {
