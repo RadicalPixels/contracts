@@ -1,0 +1,10 @@
+build/
+.idea/
+node_modules
+contracts/token/projects/
+test/token/projects/
+truffle-config.js
+
+*~
+*.swp
+*.swo
