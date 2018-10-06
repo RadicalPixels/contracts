@@ -1,17 +1,20 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
-import "./HarbergerTaxable.sol";
+import "./HarbingerTaxable.sol";
 
 /**
  * @title RadicalPixels
  */
-contract RadicalPixels is HarbergerTaxable, ERC721Token {
+contract RadicalPixels is HarbingerTaxable, ERC721Token {
   using SafeMath for uint256;
 
 
-  uint256 public xMax;
-  uint256 public yMax;
+  uint256 public   xMax;
+  uint256 public   yMax;
+  uint256 constant clearLow = 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000;
+  uint256 constant clearHigh = 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff;
+  uint256 constant factor = 0x100000000000000000000000000000000;
 
   struct Pixel {
     // Id of the pixel block
@@ -136,8 +139,22 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     public
     payable
   {
-    _addToValueHeld(msg.sender, msg.value);
+    // _addToValueHeld(msg.sender, msg.value);
     emit AddFunds(msg.sender, msg.value);
+  }
+
+  /**
+   * Encode a token ID for transferability
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function encodeTokenId(uint256 _x, uint256 _y)
+    external
+    view
+    validRange(_x, _y)
+    returns (uint256)
+  {
+    return _encodeTokenId(_x, _y);
   }
 
   /**
@@ -159,9 +176,10 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     require(pixel.seller == address(0), "Pixel must not be initialized");
 
+    uint256 tokenId = _encodeTokenId(_x, _y);
     bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
 
-    // _mint(to, tokenId)
+    _mint(msg.sender, tokenId);
 
     emit BuyPixel(
       pixelId,
@@ -189,10 +207,12 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     require(pixel.seller != address(0), "Pixel must be initialized");
     require(pixel.price == _price, "Must have sent sufficient funds");
 
-    // _removeTokenFrom(from, tokenId);
-    // _addTokenTo(to, tokenId);
-    //
-    // emit Transfer(from, to, tokenId);
+    uint256 tokenId = _encodeTokenId(_x, _y);
+
+    removeTokenFrom(pixel.seller, tokenId);
+    addTokenTo(msg.sender, tokenId);
+
+    emit Transfer(pixel.seller, msg.sender, tokenId);
 
     pixel.seller.transfer(pixel.price);
 
@@ -267,5 +287,19 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     });
 
     return pixelId;
+  }
+
+
+  /**
+   * Encode token ID
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function _encodeTokenId(uint256 _x, uint256 _y)
+    internal
+    pure
+    returns (uint256 result)
+  {
+    return ((_x * factor) & clearLow) | (_y & clearHigh);
   }
 }
