@@ -59,6 +59,11 @@ contract RadicalPixels is HarbingerTaxable {
     uint256 price
   );
 
+  event AddFunds(
+    address indexed owner,
+    uint256 indexed addedFunds
+  );
+
   constructor(uint256 _xMax, uint256 _yMax)
     public
   {
@@ -131,7 +136,8 @@ contract RadicalPixels is HarbingerTaxable {
     public
     payable
   {
-    // _addToValueHeld(msg.sender, msg.value);
+    _addToValueHeld(msg.sender, msg.value);
+    emit AddFunds(msg.sender, msg.value);
   }
 
   /**
@@ -155,7 +161,6 @@ contract RadicalPixels is HarbingerTaxable {
 
     bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
 
-    // TODO: Mint token
     // _mint(to, tokenId)
 
     emit BuyPixel(
@@ -184,7 +189,6 @@ contract RadicalPixels is HarbingerTaxable {
     require(pixel.seller != address(0), "Pixel must be initialized");
     require(pixel.price == _price, "Must have sent sufficient funds");
 
-    // TODO: Send token
     // _removeTokenFrom(from, tokenId);
     // _addTokenTo(to, tokenId);
     //
