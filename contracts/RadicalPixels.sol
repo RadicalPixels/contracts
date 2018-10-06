@@ -50,6 +50,14 @@ contract RadicalPixels {
     uint256 price
   );
 
+  event SetPixelPrice(
+    bytes32 indexed id,
+    address indexed seller,
+    uint256 x,
+    uint256 y,
+    uint256 price
+  );
+
   constructor(uint256 _xMax, uint256 _yMax)
     public
   {
@@ -69,35 +77,14 @@ contract RadicalPixels {
   function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
     public
     payable
-    validRange
+    validRange(_x, _y)
     // userHasPositiveBalance
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
     require(pixel.seller == address(0), "Pixel must not be initialized");
 
-    pixel.seller = msg.sender;
-    pixel.x = _x;
-    pixel.y = _y;
-    pixel.price = _price;
-
-    bytes32 pixelId = keccak256(
-      abi.encodePacked(
-        block.timestamp,
-        pixel.seller,
-        pixel.x,
-        pixel.y,
-        pixel.price
-      )
-    );
-
-    pixelByCoordinate[_x][_y] = Pixel({
-      id: pixelId,
-      seller: pixel.seller,
-      x: pixel.y,
-      y: pixel.x,
-      price: pixel.price
-    });
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
 
     // TODO: Mint token
     // _mint(to, tokenId)
@@ -120,7 +107,7 @@ contract RadicalPixels {
   function buyPixelBlock(uint256 _x, uint256 _y)
     public
     payable
-    validRange
+    validRange(_x, _y)
     // userHasPositiveBalance
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
@@ -146,10 +133,67 @@ contract RadicalPixels {
     );
   }
 
-  // function setPixelBlockPrice(uint256 _x, uint256 _y, uint256 price)
-  //   public
-  //   validRange
-  // {
-  //
-  // }
+  function setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
+    public
+    validRange(_x, _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(pixel.seller == msg.sender, "Sender must own the block");
+
+    delete pixelByCoordinate[_x][_y];
+
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
+
+    emit SetPixelPrice(
+      pixelId,
+      pixel.seller,
+      _x,
+      _y,
+      pixel.price
+    );
+  }
+
+  /**
+   * Internal Functions
+   */
+
+   /**
+    * @dev Update pixel mapping every time it is purchase or the price is
+    * changed
+    * @param _seller Seller of the pixel block
+    * @param _x X coordinate of the desired block
+    * @param _y Y coordinate of the desired block
+    * @param _price Price of the pixel block
+    */
+  function _updatePixelMapping
+  (
+    address _seller,
+    uint256 _x,
+    uint256 _y,
+    uint256 _price
+  )
+    internal
+    returns (bytes32)
+  {
+    bytes32 pixelId = keccak256(
+      abi.encodePacked(
+        block.timestamp,
+        _seller,
+        _x,
+        _y,
+        _price
+      )
+    );
+
+    pixelByCoordinate[_x][_y] = Pixel({
+      id: pixelId,
+      seller: _seller,
+      x: _y,
+      y: _x,
+      price: _price
+    });
+
+    return pixelId;
+  }
 }
