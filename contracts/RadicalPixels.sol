@@ -9,7 +9,6 @@ import "./HarbergerTaxable.sol";
 contract RadicalPixels is HarbergerTaxable, ERC721Token {
   using SafeMath for uint256;
 
-
   uint256 public   xMax;
   uint256 public   yMax;
   uint256 constant clearLow = 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000;
@@ -221,7 +220,6 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       _y
     );
   }
-
 
   /**
    * Encode a token ID for transferability
