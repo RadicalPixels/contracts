@@ -27,10 +27,24 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     // Pixel block price
     uint256 price;
     // Auction Id
-    uint256 auctionId;
+    bytes32 auctionId;
+  }
+
+  struct Auction {
+    // Id of the auction
+    bytes32 auctionId;
+    // Id of the pixel block
+    bytes32 blockId;
+    // Pixel block x coordinate
+    uint256 x;
+    // Pixel block y coordinate
+    uint256 y;
+    // Current price
+    uint256 currentPrice;
   }
 
   mapping(uint256 => mapping(uint256 => Pixel)) public pixelByCoordinate;
+  mapping(bytes32 => Auction) public auctionById;
 
   /**
    * Modifiers
@@ -71,7 +85,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   event BeginDutchAuction(
     bytes32 indexed pixelId,
     uint256 indexed tokenId,
-    uint256 indexed auctionId,
+    bytes32 indexed auctionId,
     address initiator,
     uint256 x,
     uint256 y,
@@ -178,7 +192,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     require(pixel.auctionId == 0);
 
     // Start a dutch auction
-    // pixel.auctionId = startAuction()
+    pixel.auctionId = _generateDutchAuction(_x, _y);
 
     uint256 tokenId = _encodeTokenId(_x, _y);
 
@@ -332,6 +346,36 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   }
 
   /**
+   * Generate a dutch auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function _generateDutchAuction(uint256 _x, uint256 _y)
+    internal
+    returns (bytes32)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    bytes32 _auctionId = keccak256(
+      abi.encodePacked(
+        block.timestamp,
+        _x,
+        _y
+      )
+    );
+
+    auctionById[_auctionId] = Auction({
+      auctionId: _auctionId,
+      blockId: pixel.id,
+      x: _x,
+      y: _y,
+      currentPrice: 0
+    });
+
+    return _auctionId;
+  }
+
+  /**
     * @dev Update pixel mapping every time it is purchase or the price is
     * changed
     * @param _seller Seller of the pixel block
@@ -367,7 +411,6 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     return pixelId;
   }
-
 
   /**
    * Encode token ID
