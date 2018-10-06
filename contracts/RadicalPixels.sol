@@ -28,6 +28,19 @@ contract RadicalPixels {
 
   mapping(uint256 => mapping(uint256 => uint256)) public pixelBlockPrice;
 
+  /**
+   * Modifiers
+   */
+   modifier validRange(uint256 _x, uint256 _y)
+  {
+    require(_x < xMax, "X coordinate is out of range");
+    require(_y < yMax, "Y coordinate is out of range");
+    _;
+  }
+
+  /**
+   * Events
+   */
   event BuyPixel(
     bytes32 indexed id,
     address indexed seller,
@@ -48,42 +61,6 @@ contract RadicalPixels {
   }
 
   /**
-  * @dev Buys a pixel block
-  * @param _x X coordinate of the desired block
-  * @param _y Y coordinate of the desired block
-  */
-  function buyPixelBlock(uint256 _x, uint256 _y)
-    public
-    payable
-    // userHasPositiveBalance
-  {
-    require(_x < xMax, "X coordinate is out of range");
-    require(_y < yMax, "Y coordinate is out of range");
-
-    Pixel memory pixel = pixelByCoordinate[_x][_y];
-
-    require(pixel.seller != address(0), "Pixel must be initialized");
-    require(pixel.price == msg.value, "Must have sent sufficient funds");
-
-    // TODO: Send token
-    // _removeTokenFrom(from, tokenId);
-    // _addTokenTo(to, tokenId);
-    //
-    // emit Transfer(from, to, tokenId);
-
-    pixel.seller.transfer(pixel.price);
-
-    emit BuyPixel(
-      pixel.id,
-      pixel.seller,
-      msg.sender,
-      _x,
-      _y,
-      pixel.price
-    );
-  }
-
-  /**
   * @dev Buys an uninitialized pixel block for 0 ETH
   * @param _x X coordinate of the desired block
   * @param _y Y coordinate of the desired block
@@ -92,11 +69,9 @@ contract RadicalPixels {
   function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
     public
     payable
+    validRange
     // userHasPositiveBalance
   {
-    require(_x < xMax, "X coordinate is out of range");
-    require(_y < yMax, "Y coordinate is out of range");
-
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
     require(pixel.seller == address(0), "Pixel must not be initialized");
@@ -136,18 +111,45 @@ contract RadicalPixels {
       _price
     );
   }
-  // function sellPixelBlock public ()
+
+  /**
+  * @dev Buys a pixel block
+  * @param _x X coordinate of the desired block
+  * @param _y Y coordinate of the desired block
+  */
+  function buyPixelBlock(uint256 _x, uint256 _y)
+    public
+    payable
+    validRange
+    // userHasPositiveBalance
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(pixel.seller != address(0), "Pixel must be initialized");
+    require(pixel.price == msg.value, "Must have sent sufficient funds");
+
+    // TODO: Send token
+    // _removeTokenFrom(from, tokenId);
+    // _addTokenTo(to, tokenId);
+    //
+    // emit Transfer(from, to, tokenId);
+
+    pixel.seller.transfer(pixel.price);
+
+    emit BuyPixel(
+      pixel.id,
+      pixel.seller,
+      msg.sender,
+      _x,
+      _y,
+      pixel.price
+    );
+  }
+
+  // function setPixelBlockPrice(uint256 _x, uint256 _y, uint256 price)
   //   public
-  //   payable
+  //   validRange
   // {
-  // emit BuyPixel(
-  //   pixel.seller,
-  //   msg.sender,
-  //   _x,
-  //   _y,
-  //   pixel.price
-  // );
+  //
   // }
-
-
 }
