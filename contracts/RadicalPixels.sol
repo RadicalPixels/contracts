@@ -202,11 +202,8 @@ contract RadicalPixels {
   {
     bytes32 pixelId = keccak256(
       abi.encodePacked(
-        block.timestamp,
-        _seller,
         _x,
         _y,
-        _price
       )
     );
 
