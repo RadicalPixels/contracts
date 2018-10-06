@@ -41,6 +41,7 @@ contract RadicalPixels {
   /**
    * Events
    */
+
   event BuyPixel(
     bytes32 indexed id,
     address indexed seller,
@@ -104,37 +105,20 @@ contract RadicalPixels {
   }
 
   /**
-  * @dev Buys a pixel block
-  * @param _x X coordinate of the desired block
-  * @param _y Y coordinate of the desired block
+  * @dev Buys pixel blocks
+  * @param _x X coordinates of the desired blocks
+  * @param _y Y coordinates of the desired blocks
+  * @param _price New prices of the pixel blocks
   */
-  function buyPixelBlock(uint256 _x, uint256 _y)
+  function buyPixelBlocks(uint256[] _x, uint256[] _y, uint256[] _price)
     public
     payable
-    validRange(_x, _y)
-    // userHasPositiveBalance
   {
-    Pixel memory pixel = pixelByCoordinate[_x][_y];
-
-    require(pixel.seller != address(0), "Pixel must be initialized");
-    require(pixel.price == msg.value, "Must have sent sufficient funds");
-
-    // TODO: Send token
-    // _removeTokenFrom(from, tokenId);
-    // _addTokenTo(to, tokenId);
-    //
-    // emit Transfer(from, to, tokenId);
-
-    pixel.seller.transfer(pixel.price);
-
-    emit BuyPixel(
-      pixel.id,
-      pixel.seller,
-      msg.sender,
-      _x,
-      _y,
-      pixel.price
-    );
+    require(_x.length == _y.length && _x.length == _price.length);
+    for (uint i = 0; i < _x.length; i++) {
+      require(_price[i] > 0);
+      _buyPixelBlock(_x[i], _y[i], _price[i]);
+    }
   }
 
   function setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
@@ -158,9 +142,45 @@ contract RadicalPixels {
     );
   }
 
+  // funciton addFunds()
+
   /**
    * Internal Functions
    */
+
+   /**
+   * @dev Buys a pixel block
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   * @param _price New price of the pixel block
+   */
+   function _buyPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+     internal
+     validRange(_x, _y)
+     // userHasPositiveBalance
+   {
+     Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+     require(pixel.seller != address(0), "Pixel must be initialized");
+     require(pixel.price == msg.value, "Must have sent sufficient funds");
+
+     // TODO: Send token
+     // _removeTokenFrom(from, tokenId);
+     // _addTokenTo(to, tokenId);
+     //
+     // emit Transfer(from, to, tokenId);
+
+     pixel.seller.transfer(pixel.price);
+
+     emit BuyPixel(
+       pixel.id,
+       pixel.seller,
+       msg.sender,
+       _x,
+       _y,
+       pixel.price
+     );
+   }
 
    /**
     * @dev Update pixel mapping every time it is purchase or the price is
