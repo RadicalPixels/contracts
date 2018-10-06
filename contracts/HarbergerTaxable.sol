@@ -36,7 +36,7 @@ contract HarbergerTaxable {
    */
    
   function() public payable {
-    userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender] + msg.value;
+    userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender].add(msg.value);
   }
 
   function withdraw(uint256 value) public {
@@ -44,7 +44,7 @@ contract HarbergerTaxable {
     require(transferTaxes(msg.sender), "User has a negative balance");
     
     // Subtract the withdrawn value from the user's account
-    userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender] - value;
+    userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender].sub(value);
     
     // Transfer remaining balance to msg.sender
     msg.sender.transfer(value);
@@ -55,7 +55,7 @@ contract HarbergerTaxable {
   }
   
   function userBalance(address user) public view returns (uint256) {
-    return userBalanceAtLastPaid[user] - _taxesDue(user);
+    return userBalanceAtLastPaid[user].sub(_taxesDue(user));
   }
   
   // Transfers the taxes a user owes from their account to the taxCollector and resets lastPaidTaxes to now
@@ -73,7 +73,7 @@ contract HarbergerTaxable {
     // Update the user's lastPaidTaxes
     lastPaidTaxes[user] = now;
     // subtract the taxes paid from the user's balance
-    userBalanceAtLastPaid[user] = userBalanceAtLastPaid[user] - taxesDue;
+    userBalanceAtLastPaid[user] = userBalanceAtLastPaid[user].sub(taxesDue);
     
     return true;
   }
@@ -88,17 +88,17 @@ contract HarbergerTaxable {
     // Make sure user owns tokens
     require(lastPaidTaxes[user] != 0, "User does not own any tokens");
 
-    uint256 timeElapsed = now - lastPaidTaxes[user];
-    return (valueHeld[user] * timeElapsed / 1 days)  * taxPercentage / 100;
+    uint256 timeElapsed = now.sub(lastPaidTaxes[user]);
+    return (valueHeld[user].mul(timeElapsed).div(1 days)).mul(taxPercentage).div(100);
   }
 
   function _addToValueHeld(address user, uint256 value) internal {
     require(transferTaxes(user), "User has a negative balance");
-    valueHeld[user] = valueHeld[user] + value;
+    valueHeld[user] = valueHeld[user].add(value);
   }
 
   function _subFromValueHeld(address user, uint256 value) internal {
     require(transferTaxes(user), "User has a negative balance");
-    valueHeld[user] = valueHeld[user] + value;
+    valueHeld[user] = valueHeld[user].add(value);
   }
 }
