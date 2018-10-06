@@ -41,6 +41,10 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 y;
     // Current price
     uint256 currentPrice;
+    // Current Leader
+    address currentLeader;
+    // End Time
+    uint256 endTime;
   }
 
   mapping(uint256 => mapping(uint256 => Pixel)) public pixelByCoordinate;
@@ -233,8 +237,10 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 _tokenId = _encodeTokenId(_x, _y);
     require(pixel.auctionId != 0);
     require(auction.currentPrice < _bid);
+    require(auction.endTime < block.timestamp);
 
     auction.currentPrice = _bid;
+    auction.currentLeader = msg.sender;
 
     emit UpdateAuctionBid(
       pixel.id,
@@ -256,18 +262,20 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     validRange(_x, _y)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
+    Auction memory auction = auctionById[pixel.auctionId];
 
     require(pixel.auctionId != 0);
+    require(block.timestamp < auction.endTime);
 
     // End dutch auction
-    // address winner = endAuction();
+    address winner = _endDutchAuction(_x, _y);
 
     uint256 tokenId = _encodeTokenId(_x, _y);
 
     emit EndDutchAuction(
       pixel.id,
       tokenId,
-      msg.sender, // should be winner
+      winner,
       _x,
       _y
     );
@@ -407,12 +415,32 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       blockId: pixel.id,
       x: _x,
       y: _y,
-      currentPrice: 0
+      currentPrice: 0,
+      currentLeader: msg.sender,
+      endTime: block.timestamp.add(1 days)
     });
 
     return _auctionId;
   }
 
+  /**
+   * End a finished dutch auction
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function _endDutchAuction(uint256 _x, uint256 _y)
+    internal
+    returns (address)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    Auction memory auction = auctionById[pixel.auctionId];
+
+    address _winner = auction.currentLeader;
+
+    delete auctionById[auction.auctionId];
+
+    return _winner;
+  }
   /**
     * @dev Update pixel mapping every time it is purchase or the price is
     * changed
