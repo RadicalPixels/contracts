@@ -9,6 +9,8 @@ contract RadicalPixels {
   using SafeMath for uint256;
 
   struct Pixel {
+    // Id of the pixel block
+    bytes32 id;
     // Owner of the pixel block
     address seller;
     // Pixel block x coordinate
@@ -27,6 +29,7 @@ contract RadicalPixels {
   mapping(uint256 => mapping(uint256 => uint256)) public pixelBlockPrice;
 
   event BuyPixel(
+    bytes32 indexed id,
     address indexed seller,
     address indexed buyer,
     uint256 x,
@@ -62,7 +65,6 @@ contract RadicalPixels {
     require(pixel.seller != address(0), "Pixel must be initialized");
     require(pixel.price == msg.value, "Must have sent sufficient funds");
 
-    // TODO: Create token ID
     // TODO: Send token
     // _removeTokenFrom(from, tokenId);
     // _addTokenTo(to, tokenId);
@@ -72,6 +74,7 @@ contract RadicalPixels {
     pixel.seller.transfer(pixel.price);
 
     emit BuyPixel(
+      pixel.id,
       pixel.seller,
       msg.sender,
       _x,
@@ -103,11 +106,29 @@ contract RadicalPixels {
     pixel.y = _y;
     pixel.price = _price;
 
-    // TODO: Create token ID
+    bytes32 pixelId = keccak256(
+      abi.encodePacked(
+        block.timestamp,
+        pixel.seller,
+        pixel.x,
+        pixel.y,
+        pixel.price
+      )
+    );
+
+    pixelByCoordinate[_x][_y] = Pixel({
+      id: pixelId,
+      seller: pixel.seller,
+      x: pixel.y,
+      y: pixel.x,
+      price: pixel.price
+    });
+
     // TODO: Mint token
     // _mint(to, tokenId)
 
     emit BuyPixel(
+      pixelId,
       address(0),
       msg.sender,
       _x,
