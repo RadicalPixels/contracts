@@ -15,11 +15,20 @@ contract HarbergerTaxableMock is HarbergerTaxable {
     taxCollector = _taxCollector;
   }
 
-  function addToValueHeld(address user, uint256 value) internal {
+  function addToValueHeld(address user, uint256 value) public {
     _addToValueHeld(user, value);
   }
 
-  function subFromValueHeld(address user, uint256 value) internal {
+  function subFromValueHeld(address user, uint256 value) public {
     _subFromValueHeld(user, value);
   }
+
+  function safeTransferTaxes(address user) public {
+    require(transferTaxes(user));
+  }
+
+  function taxesDue(address user) public view returns (uint256) {
+    return _taxesDue(user);
+  }
+
 }
