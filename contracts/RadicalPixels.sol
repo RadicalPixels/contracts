@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/Math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
 import "./HarbingerTaxable.sol";
 
 /**
  * @title RadicalPixels
  */
-contract RadicalPixels is HarbingerTaxable {
+contract RadicalPixels is HarbingerTaxable, ERC721Token {
   using SafeMath for uint256;
 
 
@@ -153,7 +153,7 @@ contract RadicalPixels is HarbingerTaxable {
   function _buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
     internal
     validRange(_x, _y)
-    // userHasPositiveBalance
+    hasPositveBalance(msg.sender)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
@@ -182,7 +182,7 @@ contract RadicalPixels is HarbingerTaxable {
   function _buyPixelBlock(uint256 _x, uint256 _y, uint256 _price)
     internal
     validRange(_x, _y)
-    // userHasPositiveBalance
+    hasPositveBalance(msg.sender)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
