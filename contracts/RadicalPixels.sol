@@ -6,7 +6,7 @@ import "./HarbergerTaxable.sol";
 /**
  * @title RadicalPixels
  */
-contract RadicalPixels is HarbingerTaxable, ERC721Token {
+contract RadicalPixels is HarbergerTaxable, ERC721Token {
   using SafeMath for uint256;
 
 
