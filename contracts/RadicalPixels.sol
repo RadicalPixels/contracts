@@ -122,27 +122,20 @@ contract RadicalPixels {
   }
 
   /**
-   * @dev Set a price for a specific block
-   */
-  function setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
+  * @dev Set prices for specific blocks
+  * @param _x X coordinates of the desired blocks
+  * @param _y Y coordinates of the desired blocks
+  * @param _price New prices of the pixel blocks
+  */
+  function setPixelBlockPrices(uint256[] _x, uint256[] _y, uint256[] _price)
     public
-    validRange(_x, _y)
+    payable
   {
-    Pixel memory pixel = pixelByCoordinate[_x][_y];
-
-    require(pixel.seller == msg.sender, "Sender must own the block");
-
-    delete pixelByCoordinate[_x][_y];
-
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
-
-    emit SetPixelPrice(
-      pixelId,
-      pixel.seller,
-      _x,
-      _y,
-      pixel.price
-    );
+    require(_x.length == _y.length && _x.length == _price.length);
+    for (uint i = 0; i < _x.length; i++) {
+      require(_price[i] > 0);
+      _setPixelBlockPrice(_x[i], _y[i], _price[i]);
+    }
   }
 
   /**
@@ -173,7 +166,7 @@ contract RadicalPixels {
      Pixel memory pixel = pixelByCoordinate[_x][_y];
 
      require(pixel.seller != address(0), "Pixel must be initialized");
-     require(pixel.price == msg.value, "Must have sent sufficient funds");
+     require(pixel.price == _price, "Must have sent sufficient funds");
 
      // TODO: Send token
      // _removeTokenFrom(from, tokenId);
@@ -187,6 +180,33 @@ contract RadicalPixels {
        pixel.id,
        pixel.seller,
        msg.sender,
+       _x,
+       _y,
+       pixel.price
+     );
+   }
+
+   /**
+   * @dev Set prices for a specific block
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   * @param _price New price of the pixel block
+   */
+   function _setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
+     internal
+     validRange(_x, _y)
+   {
+     Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+     require(pixel.seller == msg.sender, "Sender must own the block");
+
+     delete pixelByCoordinate[_x][_y];
+
+     bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
+
+     emit SetPixelPrice(
+       pixelId,
+       pixel.seller,
        _x,
        _y,
        pixel.price
