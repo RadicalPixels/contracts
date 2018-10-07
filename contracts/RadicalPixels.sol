@@ -140,7 +140,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   function transferFrom(address _from, address _to, uint256 _tokenId, uint256 _price)
     public
   {
-    _subFromValueHeld(msg.sender, _price);
+    _subFromValueHeld(msg.sender, _price, false);
     _addToValueHeld(_to, _price);
     require(_to == msg.sender);
 
@@ -326,7 +326,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     _updatePixelMapping(winner, _x, _y, auction.currentPrice, 0, "");
 
     // Update user values
-    _subFromValueHeld(pixel.seller, pixel.price);
+    _subFromValueHeld(pixel.seller, pixel.price, true);
     // _addToValueHeld(winner, auction.currentPrice);
 
     uint256 tokenId = _encodeTokenId(_x, _y);
@@ -447,7 +447,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     emit Transfer(pixel.seller, msg.sender, tokenId);
 
     _addToValueHeld(msg.sender, _price);
-    _subFromValueHeld(pixel.seller, _price);
+    _subFromValueHeld(pixel.seller, pixel.price, false);
 
     _updatePixelMapping(msg.sender, _x, _y, _price, 0, _contentData);
     pixel.seller.transfer(pixel.price);
