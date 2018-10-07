@@ -130,6 +130,20 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    * Public Functions
    */
 
+   /**
+   * @dev Buys pixel block
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   * @param _price New price of the pixel block
+   */
+   function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+     public
+     payable
+   {
+     require(_price > 0);
+     _buyUninitializedPixelBlock(_x, _y, _price);
+   }
+
   /**
   * @dev Buys pixel blocks
   * @param _x X coordinates of the desired blocks
@@ -148,7 +162,21 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   }
 
   /**
-  * @dev Buys pixel blocks
+  * @dev Buys pixel block
+  * @param _x X coordinate of the desired block
+  * @param _y Y coordinate of the desired block
+  * @param _price New price of the pixel block
+  */
+  function buyPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+    public
+    payable
+  {
+    require(_price > 0);
+    uint256 _ = _buyPixelBlock(_x, _y, _price, msg.value);
+  }
+
+  /**
+  * @dev Buys pixel block
   * @param _x X coordinates of the desired blocks
   * @param _y Y coordinates of the desired blocks
   * @param _price New prices of the pixel blocks
@@ -163,6 +191,20 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       require(_price[i] > 0);
       currentValue = _buyPixelBlock(_x[i], _y[i], _price[i], currentValue);
     }
+  }
+
+  /**
+  * @dev Set prices for specific blocks
+  * @param _x X coordinate of the desired block
+  * @param _y Y coordinate of the desired block
+  * @param _price New price of the pixel block
+  */
+  function setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
+    public
+    payable
+  {
+    require(_price > 0);
+    _setPixelBlockPrice(_x, _y, _price);
   }
 
   /**

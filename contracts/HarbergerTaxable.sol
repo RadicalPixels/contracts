@@ -24,8 +24,8 @@ contract HarbergerTaxable {
 
   /**
    * Modifiers
-   */ 
-  
+   */
+
   modifier hasPositveBalance(address user) {
     require(userHasPositveBalance(user) == true, "User has a negative balance");
     _;
