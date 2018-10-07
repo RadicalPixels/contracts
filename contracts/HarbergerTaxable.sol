@@ -7,10 +7,13 @@ contract HarbergerTaxable {
 
   uint256 public taxPercentage;
   address public taxCollector;
+  address public ethFoundation;
+  uint256 public currentFoundationContribution;
 
   constructor(uint256 _taxPercentage, address _taxCollector) public {
     taxPercentage = _taxPercentage;
     taxCollector = _taxCollector;
+    ethFoundation = 0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359;
   }
 
   // The total self-assessed value of user's assets
@@ -76,7 +79,7 @@ contract HarbergerTaxable {
     }
 
     // Transfer taxes due from this contract to the tax collector
-    taxCollector.transfer(taxesDue);
+    _payoutTaxes(taxesDue);
     // Update the user's lastPaidTaxes
     lastPaidTaxes[user] = now;
     // subtract the taxes paid from the user's balance
@@ -85,9 +88,30 @@ contract HarbergerTaxable {
     return true;
   }
 
+  function payoutEF()
+    public
+  {
+    uint256 uincornsRequirement = 2.014 ether;
+    require(currentFoundationContribution >= uincornsRequirement);
+
+    currentFoundationContribution = currentFoundationContribution.sub(uincornsRequirement);
+    ethFoundation.transfer(uincornsRequirement);
+  }
+
   /**
    * Internal functions
    */
+
+  function _payoutTaxes(uint256 _taxesDue)
+    internal
+  {
+    uint256 foundationContribution = _taxesDue.div(5);
+    uint256 taxCollectorContribution = _taxesDue.mul(4).div(5);
+
+    currentFoundationContribution += foundationContribution;
+
+    taxCollector.transfer(taxCollectorContribution);
+  }
 
   // Calculate taxes due since the last time they had taxes deducted
   // from their account or since they bought their first token.
