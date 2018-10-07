@@ -526,8 +526,8 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     pixelByCoordinate[_x][_y] = Pixel({
       id: pixelId,
       seller: _seller,
-      x: _y,
-      y: _x,
+      x: _x,
+      y: _y,
       price: _price,
       auctionId: 0
     });
