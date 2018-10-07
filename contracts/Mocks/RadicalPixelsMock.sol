@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../HarbergerTaxable.sol";
+import "../RadicalPixels.sol";
 
 contract HarbergerTaxableMock is HarbergerTaxable {
 

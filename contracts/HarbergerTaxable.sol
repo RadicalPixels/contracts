@@ -44,7 +44,7 @@ contract HarbergerTaxable {
 
   function withdraw(uint256 value) public {
     // Settle latest taxes
-    require(transferTaxes(msg.sender), "User has a negative balance");
+    require(transferTaxes(msg.sender, false), "User has a negative balance");
 
     // Subtract the withdrawn value from the user's account
     userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender].sub(value);
@@ -62,7 +62,11 @@ contract HarbergerTaxable {
   }
 
   // Transfers the taxes a user owes from their account to the taxCollector and resets lastPaidTaxes to now
-  function transferTaxes(address user) public returns (bool) {
+  function transferTaxes(address user, bool isInAuction) public returns (bool) {
+
+    if (!isInAuction) {
+      return true;
+    }
 
     uint256 taxesDue = _taxesDue(user);
 
@@ -98,13 +102,13 @@ contract HarbergerTaxable {
   }
 
   function _addToValueHeld(address user, uint256 value) internal {
-    require(transferTaxes(user), "User has a negative balance");
+    require(transferTaxes(user, false), "User has a negative balance");
     require(userBalanceAtLastPaid[user] > 0);
     valueHeld[user] = valueHeld[user].add(value);
   }
 
-  function _subFromValueHeld(address user, uint256 value) internal {
-    require(transferTaxes(user), "User has a negative balance");
-    valueHeld[user] = valueHeld[user].add(value);
+  function _subFromValueHeld(address user, uint256 value, bool isInAuction) internal {
+    require(transferTaxes(user, isInAuction), "User has a negative balance");
+    valueHeld[user] = valueHeld[user].sub(value);
   }
 }
