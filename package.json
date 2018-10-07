@@ -8,7 +8,11 @@
   },
   "scripts": {
     "test": "scripts/test.sh",
-    "flatten": "scripts/flatten.sh"
+    "flatten": "scripts/flatten.sh",
+
+    "deploy-development": "truffle migrate --reset",
+    "deploy-kovan": "truffle migrate --reset --network kovan",
+    "deploy-mainnet": "truffle migrate --reset --network mainnet"
   },
   "author": "",
   "license": "ISC",
