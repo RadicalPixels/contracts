@@ -31,7 +31,7 @@ contract('HarbergerTaxable', ([_, taxCollector, act1, act2]) => {
       let act1ExpectedValueHeld = new BigNumber(1e18);
       assert.equal(act1ValueHeld.toNumber(), act1ExpectedValueHeld.toNumber(), "Did not transfer funds")
     })
-    it('should allow someone to buy the pixel', async () => {
+    it('should allow someone to buy the pixel from the original purhcaser', async () => {
       let radicalPixels = await RadicalPixels.new(xMax, yMax, 20, taxCollector);
       await radicalPixels.addFunds({from: act1, value: web3.toWei(5, 'ether')});
       await radicalPixels.addFunds({from: act2, value: web3.toWei(5, 'ether')});
@@ -44,7 +44,6 @@ contract('HarbergerTaxable', ([_, taxCollector, act1, act2]) => {
       let act1ValueHeld = await radicalPixels.valueHeld(act1);
       let act1ExpectedValueHeld = new BigNumber(1e18);
       assert.equal(act1ValueHeld.toNumber(), act1ExpectedValueHeld.toNumber(), "Did not transfer funds")
-
 
       await radicalPixels.buyPixelBlock(0, 0, web3.toWei(2, 'ether'), contentValue, {from: act2, value: web3.toWei(1, 'ether')});
 
