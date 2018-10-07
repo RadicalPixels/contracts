@@ -286,7 +286,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     validRange(_x, _y)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
-    Auction memory auction = auctionById[pixel.auctionId];
+    Auction storage auction = auctionById[pixel.auctionId];
 
     uint256 _tokenId = _encodeTokenId(_x, _y);
     require(pixel.auctionId != 0);
