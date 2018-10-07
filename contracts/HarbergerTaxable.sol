@@ -35,7 +35,10 @@ contract HarbergerTaxable {
    * Public functions
    */
 
-  function() public payable {
+  function addFunds()
+    public
+    payable
+  {
     userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender].add(msg.value);
   }
 
