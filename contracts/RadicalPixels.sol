@@ -81,11 +81,6 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 price
   );
 
-  event AddFunds(
-    address indexed owner,
-    uint256 indexed addedFunds
-  );
-
   event BeginDutchAuction(
     bytes32 indexed pixelId,
     uint256 indexed tokenId,
@@ -223,18 +218,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       _setPixelBlockPrice(_x[i], _y[i], _price[i]);
     }
   }
-
-  /**
-   * @dev Adds funds to a users value held
-   */
-  function addFunds()
-    public
-    payable
-  {
-    _addToValueHeld(msg.sender, msg.value);
-    emit AddFunds(msg.sender, msg.value);
-  }
-
+  
   /**
    * Trigger a dutch auction
    * @param _x X coordinate of the desired block
