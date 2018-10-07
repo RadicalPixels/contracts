@@ -10,7 +10,7 @@ require('chai')
 const HarbergerTaxableMock = artifacts.require('HarbergerTaxableMock');
 const RadicalPixels = artifacts.require('RadicalPixels');
 
-contract('HarbergerTaxable', ([_, taxCollector, act1, act2]) => {
+contract('HarbergerTaxable', ([_, taxCollector, act1, act2, act3, act4]) => {
 
   const xMax = 1000;
   const yMax = 1000;
@@ -89,22 +89,82 @@ contract('HarbergerTaxable', ([_, taxCollector, act1, act2]) => {
       assert.equal(pixelData[4].toNumber(), expectedPrice.toNumber(), "Value to not change")
     })
 
-    it('should complete an auction', async () => {
+    it('should create an auction', async () => {
       let radicalPixels = await RadicalPixels.new(xMax, yMax, 20, taxCollector);
       await radicalPixels.addFunds({from: act1, value: web3.toWei(5, 'ether')});
       await radicalPixels.addFunds({from: act2, value: web3.toWei(5, 'ether')});
+      let releaseTime = await latestTime()
 
       await radicalPixels.buyUninitializedPixelBlock(0, 0, web3.toWei(1, 'ether'), contentValue, {from: act1});
       var pixelData = await radicalPixels.pixelByCoordinate(0, 0);
       assert.equal(pixelData[1], act1, "Pixel did not get transfered")
 
+      await increaseTimeTo(releaseTime + duration.years(100));
+
       let auctionId = await radicalPixels.encodeTokenId(0, 0);
       await radicalPixels.beginDutchAuction(0, 0)
-      let test = await radicalPixels.userHasPositveBalance(act1);
-      console.log(test)
-      let auctionData = await radicalPixels.auctionById(auctionId);
-      console.log(auctionData);
+
+      let auctionData = await radicalPixels.pixelByCoordinate(0, 0);
+      assert.notEqual(0,auctionData[5],'Auction did not get created');
+    })
+
+    it('should complete an auction after someone else bets', async () => {
+      let radicalPixels = await RadicalPixels.new(xMax, yMax, 20, taxCollector);
+      await radicalPixels.addFunds({from: act1, value: web3.toWei(5, 'ether')});
+      await radicalPixels.addFunds({from: act2, value: web3.toWei(5, 'ether')});
+      await radicalPixels.addFunds({from: act3, value: web3.toWei(5, 'ether')});
+
+      let releaseTime = await latestTime()
+
+      await radicalPixels.buyUninitializedPixelBlock(0, 0, web3.toWei(1, 'ether'), contentValue, {from: act1});
+      let pixelData = await radicalPixels.pixelByCoordinate(0, 0);
+      assert.equal(pixelData[1], act1, "Pixel did not get transfered")
+
+      await increaseTimeTo(releaseTime + duration.years(100));
+      releaseTime = await latestTime()
+
+      let auctionId = await radicalPixels.encodeTokenId(0, 0);
+      await radicalPixels.beginDutchAuction(0, 0)
+
+      let auctionData = await radicalPixels.pixelByCoordinate(0, 0);
+      assert.notEqual(0,auctionData[5],'lol');
+
+      await radicalPixels.bidInAuction(0, 0, web3.toWei(1, 'ether'), {from: act2});
+      await radicalPixels.bidInAuction(0, 0, web3.toWei(2, 'ether'), {from: act3});
+
+      await increaseTimeTo(releaseTime + duration.days(2));
+
+      await radicalPixels.endDutchAuction(0, 0);
+    })
+
+    it('should not allow someone to add a lower value to the auction', async () => {
+      let radicalPixels = await RadicalPixels.new(xMax, yMax, 20, taxCollector);
+      await radicalPixels.addFunds({from: act1, value: web3.toWei(5, 'ether')});
+      await radicalPixels.addFunds({from: act2, value: web3.toWei(5, 'ether')});
+      await radicalPixels.addFunds({from: act3, value: web3.toWei(5, 'ether')});
+
+      let releaseTime = await latestTime()
+
+      await radicalPixels.buyUninitializedPixelBlock(0, 0, web3.toWei(1, 'ether'), contentValue, {from: act1});
+      let pixelData = await radicalPixels.pixelByCoordinate(0, 0);
+      assert.equal(pixelData[1], act1, "Pixel did not get transfered")
+
+      await increaseTimeTo(releaseTime + duration.years(100));
+
+      let auctionId = await radicalPixels.encodeTokenId(0, 0);
+      await radicalPixels.beginDutchAuction(0, 0)
+
+      let auctionData = await radicalPixels.pixelByCoordinate(0, 0);
+      assert.notEqual(0,auctionData[5],'lol');
+
+      await radicalPixels.bidInAuction(0, 0, web3.toWei(1, 'ether'), {from: act2});
+      await radicalPixels.bidInAuction(0, 0, web3.toWei(2, 'ether'), {from: act3});
+      try {
+        await radicalPixels.bidInAuction(0, 0, web3.toWei(1, 'ether'), {from: act3});
+      } catch (e) {
+        return true;
+      }
+      assert.fail("User bid less than the previous value");
     })
   });
-
 })
