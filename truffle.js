@@ -18,5 +18,11 @@ module.exports = {
       gas: 6000000,
       from: config.ownerAccount
     }
+  },
+  solc: {
+    optimizer: {
+      enabled: true,
+      runs: 200
+    }
   }
 };
