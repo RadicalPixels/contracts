@@ -143,7 +143,17 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    * Public Functions
    */
 
-
+  /**
+   * @dev Overwrite ERC721 transferFrom with our specific needs
+   * @notice This transfer has to be approved and then triggered by the _to
+   * address in order to avoid sending unwanted pixels
+   * @param _from Address sending token
+   * @param _to Address receiving token
+   * @param _tokenId ID of the transacting token
+   * @param _price Price of the token being transfered
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
   function transferFrom(address _from, address _to, uint256 _tokenId, uint256 _price, uint256 _x, uint256 _y)
     public
     auctionNotOngoing(_x, _y)
