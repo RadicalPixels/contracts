@@ -62,6 +62,13 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     _;
   }
 
+  modifier auctionNotOngoing(uint256 _x, uint256 _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    require(pixel.auctionId == 0);
+    _;
+  }
+
   /**
    * Events
    */
@@ -137,12 +144,14 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    */
 
 
-  function transferFrom(address _from, address _to, uint256 _tokenId, uint256 _price)
+  function transferFrom(address _from, address _to, uint256 _tokenId, uint256 _price, uint256 _x, uint256 _y)
     public
+    auctionNotOngoing(_x, _y)
   {
     _subFromValueHeld(msg.sender, _price, false);
     _addToValueHeld(_to, _price);
     require(_to == msg.sender);
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
 
     super.transferFrom(_from, _to, _tokenId);
   }
@@ -250,6 +259,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    */
   function beginDutchAuction(uint256 _x, uint256 _y)
     public
+    auctionNotOngoing(_x, _y)
     validRange(_x, _y)
   {
     Pixel storage pixel = pixelByCoordinate[_x][_y];
@@ -434,6 +444,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     returns (uint256)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
+    require(pixel.auctionId == 0);  // Stack to deep if this is a modifier
     uint256 _taxOnPrice = _calculateTax(_price);
 
     require(pixel.seller != address(0), "Pixel must be initialized");
@@ -473,6 +484,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   */
   function _setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
     internal
+    auctionNotOngoing(_x, _y)
     validRange(_x, _y)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
