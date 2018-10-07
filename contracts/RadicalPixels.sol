@@ -28,6 +28,8 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 price;
     // Auction Id
     bytes32 auctionId;
+    // Content data
+    bytes32 contentData;
   }
 
   struct Auction {
@@ -70,7 +72,8 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     address indexed buyer,
     uint256 x,
     uint256 y,
-    uint256 price
+    uint256 price,
+    bytes32 contentData
   );
 
   event SetPixelPrice(
@@ -141,12 +144,13 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    * @param _x X coordinate of the desired block
    * @param _y Y coordinate of the desired block
    * @param _price New price of the pixel block
+   * @param _contentData Data for the pixel
    */
-   function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+   function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price, bytes32 _contentData)
      public
    {
      require(_price > 0);
-     _buyUninitializedPixelBlock(_x, _y, _price);
+     _buyUninitializedPixelBlock(_x, _y, _price, _contentData);
    }
 
   /**
@@ -154,14 +158,15 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   * @param _x X coordinates of the desired blocks
   * @param _y Y coordinates of the desired blocks
   * @param _price New prices of the pixel blocks
+  * @param _contentData Data for the pixel
   */
-  function buyUninitializedPixelBlocks(uint256[] _x, uint256[] _y, uint256[] _price)
+  function buyUninitializedPixelBlocks(uint256[] _x, uint256[] _y, uint256[] _price, bytes32[] _contentData)
     public
   {
-    require(_x.length == _y.length && _x.length == _price.length);
+    require(_x.length == _y.length && _x.length == _price.length && _x.length == _contentData.length);
     for (uint i = 0; i < _x.length; i++) {
       require(_price[i] > 0);
-      _buyUninitializedPixelBlock(_x[i], _y[i], _price[i]);
+      _buyUninitializedPixelBlock(_x[i], _y[i], _price[i], _contentData[i]);
     }
   }
 
@@ -170,13 +175,14 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   * @param _x X coordinate of the desired block
   * @param _y Y coordinate of the desired block
   * @param _price New price of the pixel block
+  * @param _contentData Data for the pixel
   */
-  function buyPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+  function buyPixelBlock(uint256 _x, uint256 _y, uint256 _price, bytes32 _contentData)
     public
     payable
   {
     require(_price > 0);
-    uint256 _ = _buyPixelBlock(_x, _y, _price, msg.value);
+    uint256 _ = _buyPixelBlock(_x, _y, _price, msg.value, _contentData);
   }
 
   /**
@@ -184,16 +190,17 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   * @param _x X coordinates of the desired blocks
   * @param _y Y coordinates of the desired blocks
   * @param _price New prices of the pixel blocks
+  * @param _contentData Data for the pixel
   */
-  function buyPixelBlocks(uint256[] _x, uint256[] _y, uint256[] _price)
+  function buyPixelBlocks(uint256[] _x, uint256[] _y, uint256[] _price, bytes32[] _contentData)
     public
     payable
   {
-    require(_x.length == _y.length && _x.length == _price.length);
+    require(_x.length == _y.length && _x.length == _price.length && _x.length == _contentData.length);
     uint256 currentValue = msg.value;
     for (uint i = 0; i < _x.length; i++) {
       require(_price[i] > 0);
-      currentValue = _buyPixelBlock(_x[i], _y[i], _price[i], currentValue);
+      currentValue = _buyPixelBlock(_x[i], _y[i], _price[i], currentValue, _contentData[i]);
     }
   }
 
@@ -310,7 +317,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     // End dutch auction
     address winner = _endDutchAuction(_x, _y);
-    _updatePixelMapping(winner, _x, _y, auction.currentPrice);
+    _updatePixelMapping(winner, _x, _y, auction.currentPrice, "");
 
     uint256 tokenId = _encodeTokenId(_x, _y);
     removeTokenFrom(pixel.seller, tokenId);
@@ -349,19 +356,19 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   * @param _x X coordinate of the desired block
   * @param _y Y coordinate of the desired block
   * @param _price New price for the pixel
+  * @param _contentData Data for the pixel
   */
-  function _buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
+  function _buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price, bytes32 _contentData)
     internal
     validRange(_x, _y)
     hasPositveBalance(msg.sender)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
-    // require()
     require(pixel.seller == address(0), "Pixel must not be initialized");
 
     uint256 tokenId = _encodeTokenId(_x, _y);
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, _contentData);
 
     _addToValueHeld(msg.sender, _price);
     _mint(msg.sender, tokenId);
@@ -372,7 +379,8 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       msg.sender,
       _x,
       _y,
-      _price
+      _price,
+      _contentData
     );
   }
 
@@ -382,8 +390,9 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    * @param _y Y coordinate of the desired block
    * @param _price New price of the pixel block
    * @param _currentValue Current value of the transaction
+   * @param _contentData Data for the pixel
    */
-  function _buyPixelBlock(uint256 _x, uint256 _y, uint256 _price, uint256 _currentValue)
+  function _buyPixelBlock(uint256 _x, uint256 _y, uint256 _price, uint256 _currentValue, bytes32 _contentData)
     internal
     validRange(_x, _y)
     hasPositveBalance(msg.sender)
@@ -393,7 +402,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 _taxOnPrice = _calculateTax(_price);
 
     require(pixel.seller != address(0), "Pixel must be initialized");
-    require(userBalanceAtLastPaid[msg.sender] > _taxOnPrice);
+    require(userBalanceAtLastPaid[msg.sender] >= _taxOnPrice);
     require(pixel.price <= _currentValue, "Must have sent sufficient funds");
 
     uint256 tokenId = _encodeTokenId(_x, _y);
@@ -405,7 +414,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     _addToValueHeld(msg.sender, _price);
     _subFromValueHeld(pixel.seller, _price);
 
-    _updatePixelMapping(msg.sender, _x, _y, _price);
+    _updatePixelMapping(msg.sender, _x, _y, _price, _contentData);
     pixel.seller.transfer(pixel.price);
 
     emit BuyPixel(
@@ -414,7 +423,8 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       msg.sender,
       _x,
       _y,
-      pixel.price
+      pixel.price,
+      _contentData
     );
 
     return _currentValue.sub(pixel.price);
@@ -437,7 +447,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     delete pixelByCoordinate[_x][_y];
 
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, "");
 
     emit SetPixelPrice(
       pixelId,
@@ -505,13 +515,15 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     * @param _x X coordinate of the desired block
     * @param _y Y coordinate of the desired block
     * @param _price Price of the pixel block
+    * @param _contentData Data for the pixel
     */
   function _updatePixelMapping
   (
     address _seller,
     uint256 _x,
     uint256 _y,
-    uint256 _price
+    uint256 _price,
+    bytes32 _contentData
   )
     internal
     returns (bytes32)
@@ -529,7 +541,8 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       x: _x,
       y: _y,
       price: _price,
-      auctionId: 0
+      auctionId: 0,
+      contentData: _contentData
     });
 
     return pixelId;
