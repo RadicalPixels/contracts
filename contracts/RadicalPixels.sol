@@ -133,7 +133,6 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    */
    function buyUninitializedPixelBlock(uint256 _x, uint256 _y, uint256 _price)
      public
-     payable
    {
      require(_price > 0);
      _buyUninitializedPixelBlock(_x, _y, _price);
@@ -218,7 +217,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       _setPixelBlockPrice(_x[i], _y[i], _price[i]);
     }
   }
-  
+
   /**
    * Trigger a dutch auction
    * @param _x X coordinate of the desired block
@@ -230,24 +229,25 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
-    require(!userHasPositveBalance(pixel.seller));
-    require(pixel.auctionId == 0);
 
-    // Start a dutch auction
-    pixel.auctionId = _generateDutchAuction(_x, _y);
-
-    uint256 tokenId = _encodeTokenId(_x, _y);
-
-    emit BeginDutchAuction(
-      pixel.id,
-      tokenId,
-      pixel.auctionId,
-      msg.sender,
-      _x,
-      _y,
-      block.timestamp,
-      block.timestamp.add(1 days)
-    );
+    // require(!userHasPositveBalance(pixel.seller));
+    // require(pixel.auctionId == 0);
+    //
+    // // Start a dutch auction
+    // pixel.auctionId = _generateDutchAuction(_x, _y);
+    //
+    // uint256 tokenId = _encodeTokenId(_x, _y);
+    //
+    // emit BeginDutchAuction(
+    //   pixel.id,
+    //   tokenId,
+    //   pixel.auctionId,
+    //   msg.sender,
+    //   _x,
+    //   _y,
+    //   block.timestamp,
+    //   block.timestamp.add(1 days)
+    // );
   }
 
   /**
@@ -270,6 +270,9 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     auction.currentPrice = _bid;
     auction.currentLeader = msg.sender;
+
+    // _subFromValueHeld(msg.sender, priceTheyWerePaying);
+    // _addToValueHeld(_to, newPrice*tax*freq )
 
     emit UpdateAuctionBid(
       pixel.id,
@@ -314,6 +317,15 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     );
   }
 
+  // function transferFrom(){
+  //   // _subFromValueHeld(msg.sender, x);
+  //   // _addToValueHeld(_to, newPrice*tax*freq )
+  //   require(_to == msg.sender);
+  //   emit Transfer(pixel.seller, winner, tokenId);
+  //
+  //   // super.transferFrom()
+  // }
+
   /**
    * Encode a token ID for transferability
    * @param _x X coordinate of the desired block
@@ -345,11 +357,13 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
+    // require()
     require(pixel.seller == address(0), "Pixel must not be initialized");
 
     uint256 tokenId = _encodeTokenId(_x, _y);
     bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price);
 
+    _addToValueHeld(msg.sender, _price);
     _mint(msg.sender, tokenId);
 
     emit BuyPixel(
