@@ -357,6 +357,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     emit Transfer(pixel.seller, msg.sender, tokenId);
 
+    _updatePixelMapping(msg.sender, _x, _y, _price);
     pixel.seller.transfer(pixel.price);
 
     emit BuyPixel(
