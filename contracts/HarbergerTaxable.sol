@@ -1,19 +1,27 @@
 pragma solidity ^0.4.24;
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-contract HarbergerTaxable {
+contract HarbergerTaxable is Ownable {
   using SafeMath for uint256;
 
   uint256 public taxPercentage;
   address public taxCollector;
   address public ethFoundation;
   uint256 public currentFoundationContribution;
+  uint256 public ethFoundationPercentage;
+  uint256 public taxCollectorPercentage;
+
+  event UpdateCollector(address indexed newCollector);
+  event UpdateTaxPercentages(uint256 indexed newEFPercentage, uint256 indexed newTaxCollectorPercentage);
 
   constructor(uint256 _taxPercentage, address _taxCollector) public {
     taxPercentage = _taxPercentage;
     taxCollector = _taxCollector;
     ethFoundation = 0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359;
+    ethFoundationPercentage = 20;
+    taxCollectorPercentage = 80;
   }
 
   // The total self-assessed value of user's assets
@@ -38,6 +46,28 @@ contract HarbergerTaxable {
    * Public functions
    */
 
+  function updateCollector(address _newCollector)
+    public
+    onlyOwner
+  {
+    require(_newCollector != address(0));
+    taxCollector == _newCollector;
+    emit UpdateCollector(_newCollector);
+  }
+
+  function updateTaxPercentages(uint256 _newEFPercentage, uint256 _newTaxCollectorPercentage)
+    public
+    onlyOwner
+  {
+    require(_newEFPercentage < 100);
+    require(_newTaxCollectorPercentage < 100);
+    require(_newEFPercentage.add(_newTaxCollectorPercentage) == 100);
+
+    ethFoundationPercentage = _newEFPercentage;
+    taxCollectorPercentage = _newTaxCollectorPercentage;
+    emit UpdateTaxPercentages(_newEFPercentage, _newTaxCollectorPercentage);
+  }
+
   function addFunds()
     public
     payable
@@ -45,7 +75,7 @@ contract HarbergerTaxable {
     userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender].add(msg.value);
   }
 
-  function withdraw(uint256 value) public {
+  function withdraw(uint256 value) public onlyOwner {
     // Settle latest taxes
     require(transferTaxes(msg.sender, false), "User has a negative balance");
 
@@ -105,8 +135,8 @@ contract HarbergerTaxable {
   function _payoutTaxes(uint256 _taxesDue)
     internal
   {
-    uint256 foundationContribution = _taxesDue.div(5);
-    uint256 taxCollectorContribution = _taxesDue.mul(4).div(5);
+    uint256 foundationContribution = _taxesDue.mul(ethFoundationPercentage).div(100);
+    uint256 taxCollectorContribution = _taxesDue.mul(taxCollectorPercentage).div(100);
 
     currentFoundationContribution += foundationContribution;
 
