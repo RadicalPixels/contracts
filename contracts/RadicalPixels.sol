@@ -112,6 +112,14 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 y
   );
 
+  event UpdateContentData(
+    bytes32 indexed pixelId,
+    address indexed owner,
+    uint256 x,
+    uint256 y,
+    bytes32 newContentData
+  );
+
   constructor(uint256 _xMax, uint256 _yMax, uint256 _taxPercentage, address _taxCollector)
     public
     ERC721Token("Radical Pixels", "RPX")
@@ -331,6 +339,31 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       _x,
       _y
     );
+  }
+
+  /**
+  * @dev Change content data of a pixel
+  * @param _x X coordinates of the desired blocks
+  * @param _y Y coordinates of the desired blocks
+  * @param _contentData Data for the pixel
+  */
+  function changeContentData(uint256 _x, uint256 _y, bytes32 _contentData)
+    public
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+
+    require(msg.sender == pixel.seller);
+
+    pixel.contentData = _contentData;
+
+    emit UpdateContentData(
+      pixel.id,
+      pixel.seller,
+      _x,
+      _y,
+      _contentData
+  );
+
   }
 
   /**
