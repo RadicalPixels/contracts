@@ -19,8 +19,8 @@ contract HarbergerTaxableMock is HarbergerTaxable {
     _addToValueHeld(user, value);
   }
 
-  function subFromValueHeld(address user, uint256 value) public {
-    _subFromValueHeld(user, value, false);
+  function subFromValueHeld(address user, uint256 value, bool isInAuction) public {
+    _subFromValueHeld(user, value, isInAuction);
   }
 
   function safeTransferTaxes(address user) public {

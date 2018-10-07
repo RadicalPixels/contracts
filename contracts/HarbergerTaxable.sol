@@ -64,7 +64,7 @@ contract HarbergerTaxable {
   // Transfers the taxes a user owes from their account to the taxCollector and resets lastPaidTaxes to now
   function transferTaxes(address user, bool isInAuction) public returns (bool) {
 
-    if (!isInAuction) {
+    if (isInAuction) {
       return true;
     }
 
