@@ -4,6 +4,8 @@ node_modules
 contracts/token/projects/
 test/token/projects/
 truffle-config.js
+password_kovan.txt
+password_mainnet.txt
 
 *~
 *.swp
