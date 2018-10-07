@@ -327,7 +327,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     // Update user values
     _subFromValueHeld(pixel.seller, pixel.price, true);
-    // _addToValueHeld(winner, auction.currentPrice);
+    _addToValueHeld(winner, auction.currentPrice);
 
     uint256 tokenId = _encodeTokenId(_x, _y);
     removeTokenFrom(pixel.seller, tokenId);
