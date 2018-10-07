@@ -259,8 +259,9 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     // Start a dutch auction
     pixel.auctionId = _generateDutchAuction(_x, _y);
-
     uint256 tokenId = _encodeTokenId(_x, _y);
+
+    _updatePixelMapping(pixel.seller, _x, _y, pixel.price, pixel.auctionId, "");
 
     emit BeginDutchAuction(
       pixel.id,
@@ -321,11 +322,11 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     Auction memory auction = auctionById[pixel.auctionId];
 
     require(pixel.auctionId != 0);
-    require(block.timestamp < auction.endTime);
+    require(auction.endTime < block.timestamp);
 
     // End dutch auction
     address winner = _endDutchAuction(_x, _y);
-    _updatePixelMapping(winner, _x, _y, auction.currentPrice, "");
+    _updatePixelMapping(winner, _x, _y, auction.currentPrice, 0, "");
 
     uint256 tokenId = _encodeTokenId(_x, _y);
     removeTokenFrom(pixel.seller, tokenId);
@@ -401,7 +402,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     require(pixel.seller == address(0), "Pixel must not be initialized");
 
     uint256 tokenId = _encodeTokenId(_x, _y);
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, _contentData);
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, 0, _contentData);
 
     _addToValueHeld(msg.sender, _price);
     _mint(msg.sender, tokenId);
@@ -447,7 +448,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     _addToValueHeld(msg.sender, _price);
     _subFromValueHeld(pixel.seller, _price);
 
-    _updatePixelMapping(msg.sender, _x, _y, _price, _contentData);
+    _updatePixelMapping(msg.sender, _x, _y, _price, 0, _contentData);
     pixel.seller.transfer(pixel.price);
 
     emit BuyPixel(
@@ -480,7 +481,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     delete pixelByCoordinate[_x][_y];
 
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, "");
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, 0, "");
 
     emit SetPixelPrice(
       pixelId,
@@ -556,6 +557,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 _x,
     uint256 _y,
     uint256 _price,
+    bytes32 _auctionId,
     bytes32 _contentData
   )
     internal
@@ -574,7 +576,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       x: _x,
       y: _y,
       price: _price,
-      auctionId: 0,
+      auctionId: _auctionId,
       contentData: _contentData
     });
 
