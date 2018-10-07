@@ -345,7 +345,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
     require(pixel.seller != address(0), "Pixel must be initialized");
-    require(pixel.price == _price, "Must have sent sufficient funds");
+    require(pixel.price <= msg.value, "Must have sent sufficient funds");  // TODO: This needs to increment
 
     uint256 tokenId = _encodeTokenId(_x, _y);
 
