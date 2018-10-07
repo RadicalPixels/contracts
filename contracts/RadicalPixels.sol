@@ -114,8 +114,10 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 y
   );
 
-  constructor(uint256 _xMax, uint256 _yMax)
+  constructor(uint256 _xMax, uint256 _yMax, uint256 _taxPercentage, address _taxCollector)
     public
+    ERC721Token("Radical Pixels", "RPX")
+    HarbergerTaxable(_taxPercentage, _taxCollector)
   {
     require(_xMax > 0, "xMax must be a valid number");
     require(_yMax > 0, "yMax must be a valid number");
