@@ -1,16 +1,18 @@
 pragma solidity ^0.4.24;
 
 import "../RadicalPixels.sol";
+import "zos-lib/contracts/migrations/Migratable.sol";
 
-contract HarbergerTaxableMock is HarbergerTaxable {
+contract HarbergerTaxableMock is Migratable, HarbergerTaxable {
 
-  constructor(
+  function initialize(
     uint256 _taxPercentage,
     address _taxCollector
   )
     public
-    HarbergerTaxable(_taxPercentage, _taxCollector)
+    isInitializer("HarbergerTaxableMock", "0.1.0")
   {
+    HarbergerTaxable.initialize(_taxPercentage, _taxCollector);
     taxPercentage = _taxPercentage;
     taxCollector = _taxCollector;
   }

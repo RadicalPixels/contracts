@@ -1,9 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-zos/contracts/ownership/Ownable.sol";
+import "openzeppelin-zos/contracts/math/SafeMath.sol";
+import "zos-lib/contracts/migrations/Migratable.sol";
 
-contract HarbergerTaxable is Ownable {
+contract HarbergerTaxable is Migratable, Ownable {
   using SafeMath for uint256;
 
   uint256 public taxPercentage;
@@ -16,7 +17,9 @@ contract HarbergerTaxable is Ownable {
   event UpdateCollector(address indexed newCollector);
   event UpdateTaxPercentages(uint256 indexed newEFPercentage, uint256 indexed newTaxCollectorPercentage);
 
-  constructor(uint256 _taxPercentage, address _taxCollector) public {
+  function initialize(uint256 _taxPercentage, address _taxCollector) public isInitializer("HarbergerTaxable", "0.1.0") {
+    Ownable.initialize(msg.sender);
+
     taxPercentage = _taxPercentage;
     taxCollector = _taxCollector;
     ethFoundation = 0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359;

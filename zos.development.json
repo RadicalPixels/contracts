@@ -1,0 +1,29 @@
+{
+  "contracts": {
+    "RadicalPixels": {
+      "address": "0xeb9a9356490f8f0d5825df72ca2223bd16db20bf",
+      "constructorCode": "608060405234801561001057600080fd5b50614f39806100206000396000f300",
+      "bodyBytecodeHash": "12897ae6a97e2907ef5b2996ee440b511cca06c286d5a1b20a705a8c1caa802c",
+      "bytecodeHash": "20936185f88a9736da1cbcbd4d54a6780df7755de12e693b50ae2fb5e6dff78b"
+    }
+  },
+  "proxies": {
+    "RadicalPixels": [
+      {
+        "address": "0x16328fb749e24b8f3d8ef96abfc618bc721dda74",
+        "version": "0.1.0",
+        "implementation": "0xeb9a9356490f8f0d5825df72ca2223bd16db20bf"
+      }
+    ]
+  },
+  "app": {
+    "address": "0xf7406340882b716c88e8cb6f58281a1efdcdce60"
+  },
+  "version": "0.1.0",
+  "package": {
+    "address": "0x2a9b81c6bc594db8613dd0738cbd4746b2fe36cf"
+  },
+  "provider": {
+    "address": "0x5207dd9a46fc7c3d727e4541f0c8217ee5d0bbdb"
+  }
+}

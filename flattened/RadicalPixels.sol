@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-// File: openzeppelin-solidity/contracts/introspection/ERC165.sol
+// File: openzeppelin-zos/contracts/introspection/ERC165.sol
 
 /**
  * @title ERC165
@@ -20,50 +20,13 @@ interface ERC165 {
     returns (bool);
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol
+// File: openzeppelin-zos/contracts/token/ERC721/ERC721Basic.sol
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic interface
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
 contract ERC721Basic is ERC165 {
-
-  bytes4 internal constant InterfaceId_ERC721 = 0x80ac58cd;
-  /*
-   * 0x80ac58cd ===
-   *   bytes4(keccak256('balanceOf(address)')) ^
-   *   bytes4(keccak256('ownerOf(uint256)')) ^
-   *   bytes4(keccak256('approve(address,uint256)')) ^
-   *   bytes4(keccak256('getApproved(uint256)')) ^
-   *   bytes4(keccak256('setApprovalForAll(address,bool)')) ^
-   *   bytes4(keccak256('isApprovedForAll(address,address)')) ^
-   *   bytes4(keccak256('transferFrom(address,address,uint256)')) ^
-   *   bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
-   *   bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'))
-   */
-
-  bytes4 internal constant InterfaceId_ERC721Exists = 0x4f558e79;
-  /*
-   * 0x4f558e79 ===
-   *   bytes4(keccak256('exists(uint256)'))
-   */
-
-  bytes4 internal constant InterfaceId_ERC721Enumerable = 0x780e9d63;
-  /**
-   * 0x780e9d63 ===
-   *   bytes4(keccak256('totalSupply()')) ^
-   *   bytes4(keccak256('tokenOfOwnerByIndex(address,uint256)')) ^
-   *   bytes4(keccak256('tokenByIndex(uint256)'))
-   */
-
-  bytes4 internal constant InterfaceId_ERC721Metadata = 0x5b5e139f;
-  /**
-   * 0x5b5e139f ===
-   *   bytes4(keccak256('name()')) ^
-   *   bytes4(keccak256('symbol()')) ^
-   *   bytes4(keccak256('tokenURI(uint256)'))
-   */
-
   event Transfer(
     address indexed _from,
     address indexed _to,
@@ -105,7 +68,7 @@ contract ERC721Basic is ERC165 {
     public;
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC721/ERC721.sol
+// File: openzeppelin-zos/contracts/token/ERC721/ERC721.sol
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
@@ -143,7 +106,7 @@ contract ERC721Metadata is ERC721Basic {
 contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC721/ERC721Receiver.sol
+// File: openzeppelin-zos/contracts/token/ERC721/ERC721Receiver.sol
 
 /**
  * @title ERC721 token receiver interface
@@ -162,12 +125,12 @@ contract ERC721Receiver {
    * @notice Handle the receipt of an NFT
    * @dev The ERC721 smart contract calls this function on the recipient
    * after a `safetransfer`. This function MAY throw to revert and reject the
-   * transfer. Return of other than the magic value MUST result in the
+   * transfer. Return of other than the magic value MUST result in the 
    * transaction being reverted.
    * Note: the contract address is always the message sender.
    * @param _operator The address which called `safeTransferFrom` function
    * @param _from The address which previously owned the token
-   * @param _tokenId The NFT identifier which is being transferred
+   * @param _tokenId The NFT identifier which is being transfered
    * @param _data Additional data with no specified format
    * @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
    */
@@ -181,7 +144,7 @@ contract ERC721Receiver {
     returns(bytes4);
 }
 
-// File: openzeppelin-solidity/contracts/math/SafeMath.sol
+// File: openzeppelin-zos/contracts/math/SafeMath.sol
 
 /**
  * @title SafeMath
@@ -192,48 +155,44 @@ library SafeMath {
   /**
   * @dev Multiplies two numbers, throws on overflow.
   */
-  function mul(uint256 _a, uint256 _b) internal pure returns (uint256 c) {
-    // Gas optimization: this is cheaper than asserting 'a' not being zero, but the
-    // benefit is lost if 'b' is also tested.
-    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-    if (_a == 0) {
+  function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
+    if (a == 0) {
       return 0;
     }
-
-    c = _a * _b;
-    assert(c / _a == _b);
+    c = a * b;
+    assert(c / a == b);
     return c;
   }
 
   /**
   * @dev Integer division of two numbers, truncating the quotient.
   */
-  function div(uint256 _a, uint256 _b) internal pure returns (uint256) {
-    // assert(_b > 0); // Solidity automatically throws when dividing by 0
-    // uint256 c = _a / _b;
-    // assert(_a == _b * c + _a % _b); // There is no case in which this doesn't hold
-    return _a / _b;
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    // uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return a / b;
   }
 
   /**
   * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
   */
-  function sub(uint256 _a, uint256 _b) internal pure returns (uint256) {
-    assert(_b <= _a);
-    return _a - _b;
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b <= a);
+    return a - b;
   }
 
   /**
   * @dev Adds two numbers, throws on overflow.
   */
-  function add(uint256 _a, uint256 _b) internal pure returns (uint256 c) {
-    c = _a + _b;
-    assert(c >= _a);
+  function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
+    c = a + b;
+    assert(c >= a);
     return c;
   }
 }
 
-// File: openzeppelin-solidity/contracts/AddressUtils.sol
+// File: openzeppelin-zos/contracts/AddressUtils.sol
 
 /**
  * Utility library of inline functions on addresses
@@ -243,11 +202,11 @@ library AddressUtils {
   /**
    * Returns whether the target address is a contract
    * @dev This function will return false if invoked during the constructor of a contract,
-   * as the code is not actually created until after the constructor finishes.
-   * @param _addr address to check
+   *  as the code is not actually created until after the constructor finishes.
+   * @param addr address to check
    * @return whether the target address is a contract
    */
-  function isContract(address _addr) internal view returns (bool) {
+  function isContract(address addr) internal view returns (bool) {
     uint256 size;
     // XXX Currently there is no better way to check if there is a contract in an address
     // than to check the size of the code at that address.
@@ -255,72 +214,70 @@ library AddressUtils {
     // for more details about how this works.
     // TODO Check this again before the Serenity release, because all addresses will be
     // contracts then.
-    // solium-disable-next-line security/no-inline-assembly
-    assembly { size := extcodesize(_addr) }
+    assembly { size := extcodesize(addr) }  // solium-disable-line security/no-inline-assembly
     return size > 0;
   }
 
 }
 
-// File: openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol
+// File: openzeppelin-zos/contracts/introspection/ERC165Support.sol
 
 /**
- * @title SupportsInterfaceWithLookup
- * @author Matt Condon (@shrugs)
- * @dev Implements ERC165 using a lookup table.
+ * @title ERC165Support
+ * @dev Implements ERC165 returning true for ERC165 interface identifier
  */
-contract SupportsInterfaceWithLookup is ERC165 {
+contract ERC165Support is ERC165 {
 
-  bytes4 public constant InterfaceId_ERC165 = 0x01ffc9a7;
+  bytes4 internal constant InterfaceId_ERC165 = 0x01ffc9a7;
   /**
    * 0x01ffc9a7 ===
    *   bytes4(keccak256('supportsInterface(bytes4)'))
    */
 
-  /**
-   * @dev a mapping of interface id to whether or not it's supported
-   */
-  mapping(bytes4 => bool) internal supportedInterfaces;
-
-  /**
-   * @dev A contract implementing SupportsInterfaceWithLookup
-   * implement ERC165 itself
-   */
-  constructor()
-    public
-  {
-    _registerInterface(InterfaceId_ERC165);
-  }
-
-  /**
-   * @dev implement supportsInterface(bytes4) using a lookup table
-   */
   function supportsInterface(bytes4 _interfaceId)
     external
     view
-    returns (bool)
+    returns (bool) 
   {
-    return supportedInterfaces[_interfaceId];
+    return _supportsInterface(_interfaceId);
   }
 
-  /**
-   * @dev private method for registering an interface
-   */
-  function _registerInterface(bytes4 _interfaceId)
+  function _supportsInterface(bytes4 _interfaceId)
     internal
+    view
+    returns (bool) 
   {
-    require(_interfaceId != 0xffffffff);
-    supportedInterfaces[_interfaceId] = true;
+    return _interfaceId == InterfaceId_ERC165;
   }
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol
+// File: openzeppelin-zos/contracts/token/ERC721/ERC721BasicToken.sol
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic implementation
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
-contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
+contract ERC721BasicToken is ERC165Support, ERC721Basic {
+
+  bytes4 private constant InterfaceId_ERC721 = 0x80ac58cd;
+  /*
+   * 0x80ac58cd ===
+   *   bytes4(keccak256('balanceOf(address)')) ^
+   *   bytes4(keccak256('ownerOf(uint256)')) ^
+   *   bytes4(keccak256('approve(address,uint256)')) ^
+   *   bytes4(keccak256('getApproved(uint256)')) ^
+   *   bytes4(keccak256('setApprovalForAll(address,bool)')) ^
+   *   bytes4(keccak256('isApprovedForAll(address,address)')) ^
+   *   bytes4(keccak256('transferFrom(address,address,uint256)')) ^
+   *   bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
+   *   bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'))
+   */
+
+  bytes4 private constant InterfaceId_ERC721Exists = 0x4f558e79;
+  /*
+   * 0x4f558e79 ===
+   *   bytes4(keccak256('exists(uint256)'))
+   */
 
   using SafeMath for uint256;
   using AddressUtils for address;
@@ -341,12 +298,31 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   // Mapping from owner to operator approvals
   mapping (address => mapping (address => bool)) internal operatorApprovals;
 
-  constructor()
-    public
+  /**
+   * @dev Guarantees msg.sender is owner of the given token
+   * @param _tokenId uint256 ID of the token to validate its ownership belongs to msg.sender
+   */
+  modifier onlyOwnerOf(uint256 _tokenId) {
+    require(ownerOf(_tokenId) == msg.sender);
+    _;
+  }
+
+  /**
+   * @dev Checks msg.sender can transfer a token, by being owner, approved, or operator
+   * @param _tokenId uint256 ID of the token to validate
+   */
+  modifier canTransfer(uint256 _tokenId) {
+    require(isApprovedOrOwner(msg.sender, _tokenId));
+    _;
+  }
+
+  function _supportsInterface(bytes4 _interfaceId)
+    internal
+    view
+    returns (bool)
   {
-    // register the supported interfaces to conform to ERC721 via ERC165
-    _registerInterface(InterfaceId_ERC721);
-    _registerInterface(InterfaceId_ERC721Exists);
+    return super._supportsInterface(_interfaceId) || 
+      _interfaceId == InterfaceId_ERC721 || _interfaceId == InterfaceId_ERC721Exists;
   }
 
   /**
@@ -449,8 +425,8 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     uint256 _tokenId
   )
     public
+    canTransfer(_tokenId)
   {
-    require(isApprovedOrOwner(msg.sender, _tokenId));
     require(_from != address(0));
     require(_to != address(0));
 
@@ -479,6 +455,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     uint256 _tokenId
   )
     public
+    canTransfer(_tokenId)
   {
     // solium-disable-next-line arg-overflow
     safeTransferFrom(_from, _to, _tokenId, "");
@@ -503,6 +480,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     bytes _data
   )
     public
+    canTransfer(_tokenId)
   {
     transferFrom(_from, _to, _tokenId);
     // solium-disable-next-line arg-overflow
@@ -620,7 +598,100 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol
+// File: zos-lib/contracts/migrations/Migratable.sol
+
+/**
+ * @title Migratable
+ * Helper contract to support intialization and migration schemes between
+ * different implementations of a contract in the context of upgradeability.
+ * To use it, replace the constructor with a function that has the
+ * `isInitializer` modifier starting with `"0"` as `migrationId`.
+ * When you want to apply some migration code during an upgrade, increase
+ * the `migrationId`. Or, if the migration code must be applied only after
+ * another migration has been already applied, use the `isMigration` modifier.
+ * This helper supports multiple inheritance.
+ * WARNING: It is the developer's responsibility to ensure that migrations are
+ * applied in a correct order, or that they are run at all.
+ * See `Initializable` for a simpler version.
+ */
+contract Migratable {
+  /**
+   * @dev Emitted when the contract applies a migration.
+   * @param contractName Name of the Contract.
+   * @param migrationId Identifier of the migration applied.
+   */
+  event Migrated(string contractName, string migrationId);
+
+  /**
+   * @dev Mapping of the already applied migrations.
+   * (contractName => (migrationId => bool))
+   */
+  mapping (string => mapping (string => bool)) internal migrated;
+
+  /**
+   * @dev Internal migration id used to specify that a contract has already been initialized.
+   */
+  string constant private INITIALIZED_ID = "initialized";
+
+
+  /**
+   * @dev Modifier to use in the initialization function of a contract.
+   * @param contractName Name of the contract.
+   * @param migrationId Identifier of the migration.
+   */
+  modifier isInitializer(string contractName, string migrationId) {
+    validateMigrationIsPending(contractName, INITIALIZED_ID);
+    validateMigrationIsPending(contractName, migrationId);
+    _;
+    emit Migrated(contractName, migrationId);
+    migrated[contractName][migrationId] = true;
+    migrated[contractName][INITIALIZED_ID] = true;
+  }
+
+  /**
+   * @dev Modifier to use in the migration of a contract.
+   * @param contractName Name of the contract.
+   * @param requiredMigrationId Identifier of the previous migration, required
+   * to apply new one.
+   * @param newMigrationId Identifier of the new migration to be applied.
+   */
+  modifier isMigration(string contractName, string requiredMigrationId, string newMigrationId) {
+    require(isMigrated(contractName, requiredMigrationId), "Prerequisite migration ID has not been run yet");
+    validateMigrationIsPending(contractName, newMigrationId);
+    _;
+    emit Migrated(contractName, newMigrationId);
+    migrated[contractName][newMigrationId] = true;
+  }
+
+  /**
+   * @dev Returns true if the contract migration was applied.
+   * @param contractName Name of the contract.
+   * @param migrationId Identifier of the migration.
+   * @return true if the contract migration was applied, false otherwise.
+   */
+  function isMigrated(string contractName, string migrationId) public view returns(bool) {
+    return migrated[contractName][migrationId];
+  }
+
+  /**
+   * @dev Initializer that marks the contract as initialized.
+   * It is important to run this if you had deployed a previous version of a Migratable contract.
+   * For more information see https://github.com/zeppelinos/zos-lib/issues/158.
+   */
+  function initialize() isInitializer("Migratable", "1.2.1") public {
+  }
+
+  /**
+   * @dev Reverts if the requested migration was already executed.
+   * @param contractName Name of the contract.
+   * @param migrationId Identifier of the migration.
+   */
+  function validateMigrationIsPending(string contractName, string migrationId) private view {
+    require(!isMigrated(contractName, migrationId), "Requested target migration ID has already been run");
+  }
+}
+
+// File: openzeppelin-zos/contracts/token/ERC721/ERC721Token.sol
 
 /**
  * @title Full ERC721 Token
@@ -628,7 +699,23 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
  * Moreover, it includes approve all functionality using operator terminology
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
-contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
+contract ERC721Token is Migratable, ERC165Support, ERC721BasicToken, ERC721 {
+
+  bytes4 private constant InterfaceId_ERC721Enumerable = 0x780e9d63;
+  /**
+   * 0x780e9d63 ===
+   *   bytes4(keccak256('totalSupply()')) ^
+   *   bytes4(keccak256('tokenOfOwnerByIndex(address,uint256)')) ^
+   *   bytes4(keccak256('tokenByIndex(uint256)'))
+   */
+
+  bytes4 private constant InterfaceId_ERC721Metadata = 0x5b5e139f;
+  /**
+   * 0x5b5e139f ===
+   *   bytes4(keccak256('name()')) ^
+   *   bytes4(keccak256('symbol()')) ^
+   *   bytes4(keccak256('tokenURI(uint256)'))
+   */
 
   // Token name
   string internal name_;
@@ -654,13 +741,18 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   /**
    * @dev Constructor function
    */
-  constructor(string _name, string _symbol) public {
+  function initialize(string _name, string _symbol) public isInitializer("ERC721Token", "1.9.0") {
     name_ = _name;
     symbol_ = _symbol;
+  }
 
-    // register the supported interfaces to conform to ERC721 via ERC165
-    _registerInterface(InterfaceId_ERC721Enumerable);
-    _registerInterface(InterfaceId_ERC721Metadata);
+  function _supportsInterface(bytes4 _interfaceId)
+    internal
+    view
+    returns (bool)
+  {
+    return super._supportsInterface(_interfaceId) || 
+      _interfaceId == InterfaceId_ERC721Enumerable || _interfaceId == InterfaceId_ERC721Metadata;
   }
 
   /**
@@ -757,20 +849,17 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   function removeTokenFrom(address _from, uint256 _tokenId) internal {
     super.removeTokenFrom(_from, _tokenId);
 
-    // To prevent a gap in the array, we store the last token in the index of the token to delete, and
-    // then delete the last slot.
     uint256 tokenIndex = ownedTokensIndex[_tokenId];
     uint256 lastTokenIndex = ownedTokens[_from].length.sub(1);
     uint256 lastToken = ownedTokens[_from][lastTokenIndex];
 
     ownedTokens[_from][tokenIndex] = lastToken;
-    // This also deletes the contents at the last position of the array
-    ownedTokens[_from].length--;
-
+    ownedTokens[_from][lastTokenIndex] = 0;
     // Note that this will handle single-element arrays. In that case, both tokenIndex and lastTokenIndex are going to
     // be zero. Then we can make sure that we will remove _tokenId from the ownedTokens list since we are first swapping
     // the lastToken to the first position, and then dropping the element placed in the last position of the list
 
+    ownedTokens[_from].length--;
     ownedTokensIndex[_tokenId] = 0;
     ownedTokensIndex[lastToken] = tokenIndex;
   }
@@ -817,17 +906,70 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
 
 }
 
+// File: openzeppelin-zos/contracts/ownership/Ownable.sol
+
+/**
+ * @title Ownable
+ * @dev The Ownable contract has an owner address, and provides basic authorization control
+ * functions, this simplifies the implementation of "user permissions".
+ */
+contract Ownable is Migratable {
+  address public owner;
+
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * account.
+   */
+  function initialize(address _sender) public isInitializer("Ownable", "1.9.0") {
+    owner = _sender;
+  }
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
+  }
+
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0));
+    emit OwnershipTransferred(owner, newOwner);
+    owner = newOwner;
+  }
+
+}
+
 // File: contracts/HarbergerTaxable.sol
 
-contract HarbergerTaxable {
+contract HarbergerTaxable is Migratable, Ownable {
   using SafeMath for uint256;
 
   uint256 public taxPercentage;
   address public taxCollector;
+  address public ethFoundation;
+  uint256 public currentFoundationContribution;
+  uint256 public ethFoundationPercentage;
+  uint256 public taxCollectorPercentage;
 
-  constructor(uint256 _taxPercentage, address _taxCollector) public {
+  event UpdateCollector(address indexed newCollector);
+  event UpdateTaxPercentages(uint256 indexed newEFPercentage, uint256 indexed newTaxCollectorPercentage);
+
+  function initialize(uint256 _taxPercentage, address _taxCollector) public isInitializer("HarbergerTaxable", "0.1.0") {
+    Ownable.initialize(msg.sender);
+
     taxPercentage = _taxPercentage;
     taxCollector = _taxCollector;
+    ethFoundation = 0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359;
+    ethFoundationPercentage = 20;
+    taxCollectorPercentage = 80;
   }
 
   // The total self-assessed value of user's assets
@@ -852,6 +994,28 @@ contract HarbergerTaxable {
    * Public functions
    */
 
+  function updateCollector(address _newCollector)
+    public
+    onlyOwner
+  {
+    require(_newCollector != address(0));
+    taxCollector == _newCollector;
+    emit UpdateCollector(_newCollector);
+  }
+
+  function updateTaxPercentages(uint256 _newEFPercentage, uint256 _newTaxCollectorPercentage)
+    public
+    onlyOwner
+  {
+    require(_newEFPercentage < 100);
+    require(_newTaxCollectorPercentage < 100);
+    require(_newEFPercentage.add(_newTaxCollectorPercentage) == 100);
+
+    ethFoundationPercentage = _newEFPercentage;
+    taxCollectorPercentage = _newTaxCollectorPercentage;
+    emit UpdateTaxPercentages(_newEFPercentage, _newTaxCollectorPercentage);
+  }
+
   function addFunds()
     public
     payable
@@ -859,9 +1023,9 @@ contract HarbergerTaxable {
     userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender].add(msg.value);
   }
 
-  function withdraw(uint256 value) public {
+  function withdraw(uint256 value) public onlyOwner {
     // Settle latest taxes
-    require(transferTaxes(msg.sender), "User has a negative balance");
+    require(transferTaxes(msg.sender, false), "User has a negative balance");
 
     // Subtract the withdrawn value from the user's account
     userBalanceAtLastPaid[msg.sender] = userBalanceAtLastPaid[msg.sender].sub(value);
@@ -879,7 +1043,11 @@ contract HarbergerTaxable {
   }
 
   // Transfers the taxes a user owes from their account to the taxCollector and resets lastPaidTaxes to now
-  function transferTaxes(address user) public returns (bool) {
+  function transferTaxes(address user, bool isInAuction) public returns (bool) {
+
+    if (isInAuction) {
+      return true;
+    }
 
     uint256 taxesDue = _taxesDue(user);
 
@@ -889,7 +1057,7 @@ contract HarbergerTaxable {
     }
 
     // Transfer taxes due from this contract to the tax collector
-    taxCollector.transfer(taxesDue);
+    _payoutTaxes(taxesDue);
     // Update the user's lastPaidTaxes
     lastPaidTaxes[user] = now;
     // subtract the taxes paid from the user's balance
@@ -898,9 +1066,30 @@ contract HarbergerTaxable {
     return true;
   }
 
+  function payoutEF()
+    public
+  {
+    uint256 uincornsRequirement = 2.014 ether;
+    require(currentFoundationContribution >= uincornsRequirement);
+
+    currentFoundationContribution = currentFoundationContribution.sub(uincornsRequirement);
+    ethFoundation.transfer(uincornsRequirement);
+  }
+
   /**
    * Internal functions
    */
+
+  function _payoutTaxes(uint256 _taxesDue)
+    internal
+  {
+    uint256 foundationContribution = _taxesDue.mul(ethFoundationPercentage).div(100);
+    uint256 taxCollectorContribution = _taxesDue.mul(taxCollectorPercentage).div(100);
+
+    currentFoundationContribution += foundationContribution;
+
+    taxCollector.transfer(taxCollectorContribution);
+  }
 
   // Calculate taxes due since the last time they had taxes deducted
   // from their account or since they bought their first token.
@@ -915,14 +1104,14 @@ contract HarbergerTaxable {
   }
 
   function _addToValueHeld(address user, uint256 value) internal {
-    require(transferTaxes(user), "User has a negative balance");
+    require(transferTaxes(user, false), "User has a negative balance");
     require(userBalanceAtLastPaid[user] > 0);
     valueHeld[user] = valueHeld[user].add(value);
   }
 
-  function _subFromValueHeld(address user, uint256 value) internal {
-    require(transferTaxes(user), "User has a negative balance");
-    valueHeld[user] = valueHeld[user].add(value);
+  function _subFromValueHeld(address user, uint256 value, bool isInAuction) internal {
+    require(transferTaxes(user, isInAuction), "User has a negative balance");
+    valueHeld[user] = valueHeld[user].sub(value);
   }
 }
 
@@ -931,7 +1120,7 @@ contract HarbergerTaxable {
 /**
  * @title RadicalPixels
  */
-contract RadicalPixels is HarbergerTaxable, ERC721Token {
+contract RadicalPixels is Migratable, HarbergerTaxable, ERC721Token {
   using SafeMath for uint256;
 
   uint256 public   xMax;
@@ -984,6 +1173,13 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   {
     require(_x < xMax, "X coordinate is out of range");
     require(_y < yMax, "Y coordinate is out of range");
+    _;
+  }
+
+  modifier auctionNotOngoing(uint256 _x, uint256 _y)
+  {
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    require(pixel.auctionId == 0);
     _;
   }
 
@@ -1045,11 +1241,12 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     bytes32 newContentData
   );
 
-  constructor(uint256 _xMax, uint256 _yMax, uint256 _taxPercentage, address _taxCollector)
+  function initialize(uint256 _xMax, uint256 _yMax, uint256 _taxPercentage, address _taxCollector)
     public
-    ERC721Token("Radical Pixels", "RPX")
-    HarbergerTaxable(_taxPercentage, _taxCollector)
+    isInitializer("HarbergerTaxable", "0.1.0")
   {
+    ERC721Token.initialize("Radical Pixels", "RPX");
+    HarbergerTaxable.initialize(_taxPercentage, _taxCollector);
     require(_xMax > 0, "xMax must be a valid number");
     require(_yMax > 0, "yMax must be a valid number");
 
@@ -1061,13 +1258,25 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    * Public Functions
    */
 
-
-  function transferFrom(address _from, address _to, uint256 _tokenId, uint256 _price)
+  /**
+   * @dev Overwrite ERC721 transferFrom with our specific needs
+   * @notice This transfer has to be approved and then triggered by the _to
+   * address in order to avoid sending unwanted pixels
+   * @param _from Address sending token
+   * @param _to Address receiving token
+   * @param _tokenId ID of the transacting token
+   * @param _price Price of the token being transfered
+   * @param _x X coordinate of the desired block
+   * @param _y Y coordinate of the desired block
+   */
+  function transferFrom(address _from, address _to, uint256 _tokenId, uint256 _price, uint256 _x, uint256 _y)
     public
+    auctionNotOngoing(_x, _y)
   {
-    _subFromValueHeld(msg.sender, _price);
+    _subFromValueHeld(msg.sender, _price, false);
     _addToValueHeld(_to, _price);
     require(_to == msg.sender);
+    Pixel memory pixel = pixelByCoordinate[_x][_y];
 
     super.transferFrom(_from, _to, _tokenId);
   }
@@ -1175,17 +1384,19 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    */
   function beginDutchAuction(uint256 _x, uint256 _y)
     public
+    auctionNotOngoing(_x, _y)
     validRange(_x, _y)
   {
-    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    Pixel storage pixel = pixelByCoordinate[_x][_y];
 
     require(!userHasPositveBalance(pixel.seller));
     require(pixel.auctionId == 0);
 
     // Start a dutch auction
     pixel.auctionId = _generateDutchAuction(_x, _y);
-
     uint256 tokenId = _encodeTokenId(_x, _y);
+
+    _updatePixelMapping(pixel.seller, _x, _y, pixel.price, pixel.auctionId, "");
 
     emit BeginDutchAuction(
       pixel.id,
@@ -1210,18 +1421,15 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     validRange(_x, _y)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
-    Auction memory auction = auctionById[pixel.auctionId];
+    Auction storage auction = auctionById[pixel.auctionId];
 
     uint256 _tokenId = _encodeTokenId(_x, _y);
     require(pixel.auctionId != 0);
     require(auction.currentPrice < _bid);
-    require(auction.endTime < block.timestamp);
+    require(block.timestamp < auction.endTime);
 
     auction.currentPrice = _bid;
     auction.currentLeader = msg.sender;
-
-    // _subFromValueHeld(msg.sender, priceTheyWerePaying);
-    // _addToValueHeld(_to, newPrice*tax*freq )
 
     emit UpdateAuctionBid(
       pixel.id,
@@ -1246,11 +1454,15 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     Auction memory auction = auctionById[pixel.auctionId];
 
     require(pixel.auctionId != 0);
-    require(block.timestamp < auction.endTime);
+    require(auction.endTime < block.timestamp);
 
     // End dutch auction
     address winner = _endDutchAuction(_x, _y);
-    _updatePixelMapping(winner, _x, _y, auction.currentPrice, "");
+    _updatePixelMapping(winner, _x, _y, auction.currentPrice, 0, "");
+
+    // Update user values
+    _subFromValueHeld(pixel.seller, pixel.price, true);
+    _addToValueHeld(winner, auction.currentPrice);
 
     uint256 tokenId = _encodeTokenId(_x, _y);
     removeTokenFrom(pixel.seller, tokenId);
@@ -1275,7 +1487,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   function changeContentData(uint256 _x, uint256 _y, bytes32 _contentData)
     public
   {
-    Pixel memory pixel = pixelByCoordinate[_x][_y];
+    Pixel storage pixel = pixelByCoordinate[_x][_y];
 
     require(msg.sender == pixel.seller);
 
@@ -1326,7 +1538,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     require(pixel.seller == address(0), "Pixel must not be initialized");
 
     uint256 tokenId = _encodeTokenId(_x, _y);
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, _contentData);
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, 0, _contentData);
 
     _addToValueHeld(msg.sender, _price);
     _mint(msg.sender, tokenId);
@@ -1357,6 +1569,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     returns (uint256)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
+    require(pixel.auctionId == 0);  // Stack to deep if this is a modifier
     uint256 _taxOnPrice = _calculateTax(_price);
 
     require(pixel.seller != address(0), "Pixel must be initialized");
@@ -1370,9 +1583,9 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     emit Transfer(pixel.seller, msg.sender, tokenId);
 
     _addToValueHeld(msg.sender, _price);
-    _subFromValueHeld(pixel.seller, _price);
+    _subFromValueHeld(pixel.seller, pixel.price, false);
 
-    _updatePixelMapping(msg.sender, _x, _y, _price, _contentData);
+    _updatePixelMapping(msg.sender, _x, _y, _price, 0, _contentData);
     pixel.seller.transfer(pixel.price);
 
     emit BuyPixel(
@@ -1396,6 +1609,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
   */
   function _setPixelBlockPrice(uint256 _x, uint256 _y, uint256 _price)
     internal
+    auctionNotOngoing(_x, _y)
     validRange(_x, _y)
   {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
@@ -1405,7 +1619,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
 
     delete pixelByCoordinate[_x][_y];
 
-    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, "");
+    bytes32 pixelId = _updatePixelMapping(msg.sender, _x, _y, _price, 0, "");
 
     emit SetPixelPrice(
       pixelId,
@@ -1481,6 +1695,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     uint256 _x,
     uint256 _y,
     uint256 _price,
+    bytes32 _auctionId,
     bytes32 _contentData
   )
     internal
@@ -1499,7 +1714,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
       x: _x,
       y: _y,
       price: _price,
-      auctionId: 0,
+      auctionId: _auctionId,
       contentData: _contentData
     });
 

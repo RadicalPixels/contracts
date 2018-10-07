@@ -1,0 +1,7 @@
+{
+  "name": "radical-pixels",
+  "version": "0.1.0",
+  "contracts": {
+    "RadicalPixels": "RadicalPixels"
+  }
+}

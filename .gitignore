@@ -10,3 +10,5 @@ password_mainnet.txt
 *~
 *.swp
 *.swo
+
+.zos.session

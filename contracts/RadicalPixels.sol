@@ -1,12 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
+import "openzeppelin-zos/contracts/token/ERC721/ERC721Token.sol";
 import "./HarbergerTaxable.sol";
+import "zos-lib/contracts/migrations/Migratable.sol";
 
 /**
  * @title RadicalPixels
  */
-contract RadicalPixels is HarbergerTaxable, ERC721Token {
+contract RadicalPixels is Migratable, HarbergerTaxable, ERC721Token {
   using SafeMath for uint256;
 
   uint256 public   xMax;
@@ -127,11 +128,12 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     bytes32 newContentData
   );
 
-  constructor(uint256 _xMax, uint256 _yMax, uint256 _taxPercentage, address _taxCollector)
+  function initialize(uint256 _xMax, uint256 _yMax, uint256 _taxPercentage, address _taxCollector)
     public
-    ERC721Token("Radical Pixels", "RPX")
-    HarbergerTaxable(_taxPercentage, _taxCollector)
+    isInitializer("HarbergerTaxable", "0.1.0")
   {
+    ERC721Token.initialize("Radical Pixels", "RPX");
+    HarbergerTaxable.initialize(_taxPercentage, _taxCollector);
     require(_xMax > 0, "xMax must be a valid number");
     require(_yMax > 0, "yMax must be a valid number");
 
