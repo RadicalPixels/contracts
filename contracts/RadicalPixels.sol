@@ -126,16 +126,15 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
    */
 
 
-  // function transferFrom(address _from, address _to, address _tokenId, uint256 _price)
-  //   public
-  // {
-  //   uint256 _taxOnPrice = _calculateTax(_price);
-  //   _subFromValueHeld(msg.sender, _price);
-  //   _addToValueHeld(_to, _taxOnPrice)
-  //   require(_to == msg.sender);
-  //
-  //  super.transferFrom(_from, _to, _tokenId);
-  // }
+  function transferFrom(address _from, address _to, uint256 _tokenId, uint256 _price)
+    public
+  {
+    _subFromValueHeld(msg.sender, _price);
+    _addToValueHeld(_to, _price);
+    require(_to == msg.sender);
+
+    super.transferFrom(_from, _to, _tokenId);
+  }
 
    /**
    * @dev Buys pixel block
@@ -403,6 +402,9 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     addTokenTo(msg.sender, tokenId);
     emit Transfer(pixel.seller, msg.sender, tokenId);
 
+    _addToValueHeld(msg.sender, _price);
+    _subFromValueHeld(pixel.seller, _price);
+
     _updatePixelMapping(msg.sender, _x, _y, _price);
     pixel.seller.transfer(pixel.price);
 
@@ -431,6 +433,7 @@ contract RadicalPixels is HarbergerTaxable, ERC721Token {
     Pixel memory pixel = pixelByCoordinate[_x][_y];
 
     require(pixel.seller == msg.sender, "Sender must own the block");
+    _addToValueHeld(msg.sender, _price);
 
     delete pixelByCoordinate[_x][_y];
 

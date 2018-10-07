@@ -96,6 +96,7 @@ contract HarbergerTaxable {
 
   function _addToValueHeld(address user, uint256 value) internal {
     require(transferTaxes(user), "User has a negative balance");
+    require(userBalanceAtLastPaid[user] > 0);
     valueHeld[user] = valueHeld[user].add(value);
   }
 
