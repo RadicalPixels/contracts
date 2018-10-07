@@ -8,7 +8,7 @@ The first time you pull down the repo run `chmod +x scripts/**`.
 npm test
 ```
 
-##### Deploy to Kovan:
+#### Deploy to Kovan:
 
 If you haven't already, create an account for the Kovan testnet:
 
@@ -26,7 +26,7 @@ $ parity --chain=kovan --unlock=YOUR_OWNER_ADDRESS --password=./password_kovan.t
 
 In `config/config.json` set `ownerAccount:` to your unlocked account.
 
-##### Main Net:
+#### Main Net:
 
 If you haven't already, create an account to use with Parity on Main Net:
 
